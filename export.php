@@ -50,3 +50,4 @@ $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 $dompdf->stream("cv.pdf", ["Attachment" => true]);
+?>
