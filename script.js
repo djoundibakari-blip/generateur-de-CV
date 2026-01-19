@@ -4,30 +4,34 @@ document.addEventListener("DOMContentLoaded", () => {
         champ.addEventListener("input", mettreAJourApercu);
     });
 
-    document.getElementById("btn-ajout-experience").addEventListener("click", ajouterExperience);
-    document.getElementById("btn-ajout-formation").addEventListener("click", ajouterFormation);
-    document.getElementById("btn-ajout-competence").addEventListener("click", ajouterCompetence);
+    const btnExp = document.getElementById("btn-ajout-experience");
+    const btnForm = document.getElementById("btn-ajout-formation");
+    const btnComp = document.getElementById("btn-ajout-competence");
+
+    if (btnExp) btnExp.addEventListener("click", ajouterExperience);
+    if (btnForm) btnForm.addEventListener("click", ajouterFormation);
+    if (btnComp) btnComp.addEventListener("click", ajouterCompetence);
+
+    mettreAJourApercu();
 });
-
-
 
 function mettreAJourApercu() {
     const get = name => document.querySelector(`[name="${name}"]`)?.value || "";
 
-    document.getElementById("apercu-nom").textContent =
-        get("prenom") + " " + get("nom");
+    const nomComplet = (get("prenom") + " " + get("nom")).trim();
+    document.getElementById("apercu-nom").textContent = nomComplet || "Prénom Nom";
 
-    document.getElementById("apercu-titre").textContent = get("headline");
+    document.getElementById("apercu-titre").textContent = get("headline") || "Titre professionnel";
     document.getElementById("apercu-contact").textContent =
-        get("email") + " | " + get("telephone");
+        (get("email") + " | " + get("telephone")).replace(" | ", " | ").trim();
 
-    document.getElementById("apercu-resume").textContent = get("resume");
+    document.getElementById("apercu-resume").textContent =
+        get("resume") || "Votre résumé professionnel apparaîtra ici...";
 
     afficherExperiences();
     afficherFormations();
     afficherCompetences();
 }
-
 
 function ajouterExperience() {
     document.getElementById("bloc-experiences").insertAdjacentHTML("beforeend", `
@@ -67,7 +71,6 @@ function ajouterCompetence() {
     activerEcouteurs();
 }
 
-
 function afficherExperiences() {
     const postes = document.querySelectorAll('[name="poste[]"]');
     const entreprises = document.querySelectorAll('[name="entreprise[]"]');
@@ -76,12 +79,17 @@ function afficherExperiences() {
     const descriptions = document.querySelectorAll('[name="description_exp[]"]');
 
     let html = "";
+
     postes.forEach((_, i) => {
-        html += `<div>
-            <strong>${postes[i].value}</strong> - ${entreprises[i].value}
-            (${debuts[i].value} - ${fins[i].value})<br>
-            ${descriptions[i].value}
-        </div>`;
+        if (postes[i].value || entreprises[i].value || descriptions[i].value) {
+            html += `
+                <div>
+                    <strong>${postes[i].value}</strong> - ${entreprises[i].value}<br>
+                    ${debuts[i].value} - ${fins[i].value}<br>
+                    ${descriptions[i].value}
+                </div>
+            `;
+        }
     });
 
     document.getElementById("apercu-experiences").innerHTML = html;
@@ -94,11 +102,16 @@ function afficherFormations() {
     const fins = document.querySelectorAll('[name="fin_form[]"]');
 
     let html = "";
+
     diplomes.forEach((_, i) => {
-        html += `<div>
-            <strong>${diplomes[i].value}</strong> - ${ecoles[i].value}
-            (${debuts[i].value} - ${fins[i].value})
-        </div>`;
+        if (diplomes[i].value || ecoles[i].value) {
+            html += `
+                <div>
+                    <strong>${diplomes[i].value}</strong> - ${ecoles[i].value}<br>
+                    ${debuts[i].value} - ${fins[i].value}
+                </div>
+            `;
+        }
     });
 
     document.getElementById("apercu-formations").innerHTML = html;
@@ -109,13 +122,15 @@ function afficherCompetences() {
     const niveaux = document.querySelectorAll('[name="niveau[]"]');
 
     let html = "";
+
     competences.forEach((_, i) => {
-        html += `<li>${competences[i].value} (${niveaux[i].value})</li>`;
+        if (competences[i].value) {
+            html += `<li>${competences[i].value} (${niveaux[i].value})</li>`;
+        }
     });
 
     document.getElementById("apercu-competences").innerHTML = html;
 }
-
 
 function activerEcouteurs() {
     document.querySelectorAll(".champ-cv").forEach(champ => {
@@ -123,4 +138,3 @@ function activerEcouteurs() {
         champ.addEventListener("input", mettreAJourApercu);
     });
 }
-

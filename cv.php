@@ -1,35 +1,41 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>CV Djoundi</title>
 </head>
 <body>
-<h1>Djoundi</h1>
-<p>Développeur Web</p>
-<p>Email : djoundi@email.com</p>
-<p>Téléphone : 06 64 29 81 21</p>
-<p>Ville : Lyon</p>
 
-<hr>
+<h1><?= htmlspecialchars($prenom) ?> <?= htmlspecialchars($nom) ?></h1>
+<div class="headline"><?= htmlspecialchars($headline) ?></div>
+<div><?= htmlspecialchars($email) ?> | <?= htmlspecialchars($telephone) ?></div>
 
-<h2>Profil</h2>
-<p>Étudiant développeur web passionné par le front-end et le back-end, motivé par la création d\'applications modernes et performantes.</p>
-<h2>Compétences</h2>
+<div class="section">Profil</div>
+<p><?= nl2br(htmlspecialchars($resume)) ?></p>
+
+<div class="secsectiontion">Expériences</div>
+<?php foreach ($experiences as $e): ?>
+    <p>
+        <strong><?= htmlspecialchars($e['poste']) ?></strong> - <?= htmlspecialchars($e['entreprise']) ?><br>
+        <?= htmlspecialchars($e['debut']) ?> - <?= htmlspecialchars($e['fin']) ?><br>
+        <?= nl2br(htmlspecialchars($e['description'])) ?>
+    </p>
+<?php endforeach; ?>
+
+<div class="section">Formations</div>
+<?php foreach ($formations as $f): ?>
+    <p>
+        <strong><?= htmlspecialchars($f['diplome']) ?></strong> - <?= htmlspecialchars($f['ecole']) ?><br>
+        <?= htmlspecialchars($f['debut']) ?> - <?= htmlspecialchars($f['fin']) ?>
+    </p>
+<?php endforeach; ?>
+
+<div class="section">Compétences</div>
 <ul>
-    <li>HTML / CSS / JavaScript</li>
-    <li>PHP / MySQL</li>
-    <li>Git / GitHub</li>
-    <li>React (bases)</li>
+    <?php foreach ($competences as $c): ?>
+        <li><?= htmlspecialchars($c['nom']) ?> (<?= htmlspecialchars($c['niveau']) ?>)</li>
+    <?php endforeach; ?>
 </ul>
-<h2>Expériences</h2>
-<p><strong>Projet Portfolio – Epitech (2024)</strong></p>
-<p>Création d\'un site portfolio responsive en HTML, CSS et JavaScript.</p>
-<p><strong>Projet Intégration Web (2024)</strong></p>
-<p>Intégration de maquettes Figma en respectant les normes responsive.</p>
-<h2>Formation</h2>
-<p><strong>Epitech Web Academy (2024 - 2027)</strong></p>
-<p>Formation Développeur Web & Mobile</p>
+
 </body>
 </html>
+
