@@ -18,15 +18,17 @@ document.addEventListener("DOMContentLoaded", () => {
 function mettreAJourApercu() {
     const get = name => document.querySelector(`[name="${name}"]`)?.value || "";
 
-    const nomComplet = (get("prenom") + " " + get("nom")).trim();
-    document.getElementById("apercu-nom").textContent = nomComplet || "Prénom Nom";
+    document.getElementById("apercu-nom").textContent =
+        (get("prenom") + " " + get("nom")).trim() || "Prénom Nom";
 
-    document.getElementById("apercu-titre").textContent = get("headline") || "Titre professionnel";
+    document.getElementById("apercu-titre").textContent =
+        get("headline") || "Titre professionnel";
+
     document.getElementById("apercu-contact").textContent =
-        (get("email") + " | " + get("telephone")).replace(" | ", " | ").trim();
+        (get("email") + " | " + get("telephone")).trim();
 
     document.getElementById("apercu-resume").textContent =
-        get("resume") || "Votre résumé professionnel apparaîtra ici...";
+        get("resume") || "Votre résumé apparaîtra ici";
 
     afficherExperiences();
     afficherFormations();
@@ -40,7 +42,11 @@ function ajouterExperience() {
             <input class="form-control mb-1 champ-cv" name="entreprise[]" placeholder="Entreprise">
             <input class="form-control mb-1 champ-cv" name="debut_exp[]" placeholder="Début">
             <input class="form-control mb-1 champ-cv" name="fin_exp[]" placeholder="Fin">
-            <textarea class="form-control champ-cv" name="description_exp[]" placeholder="Description"></textarea>
+            <textarea class="form-control champ-cv mb-2" name="description_exp[]" placeholder="Description"></textarea>
+
+            <button type="button" class="btn btn-sm btn-danger w-100 btn-supprimer">
+                Supprimer cette expérience
+            </button>
         </div>
     `);
 
@@ -53,7 +59,11 @@ function ajouterFormation() {
             <input class="form-control mb-1 champ-cv" name="diplome[]" placeholder="Diplôme">
             <input class="form-control mb-1 champ-cv" name="ecole[]" placeholder="Établissement">
             <input class="form-control mb-1 champ-cv" name="debut_form[]" placeholder="Début">
-            <input class="form-control champ-cv" name="fin_form[]" placeholder="Fin">
+            <input class="form-control champ-cv mb-2" name="fin_form[]" placeholder="Fin">
+
+            <button type="button" class="btn btn-sm btn-danger w-100 btn-supprimer">
+                Supprimer cette formation
+            </button>
         </div>
     `);
 
@@ -64,7 +74,11 @@ function ajouterCompetence() {
     document.getElementById("bloc-competences").insertAdjacentHTML("beforeend", `
         <div class="border p-2 mb-2">
             <input class="form-control mb-1 champ-cv" name="competence[]" placeholder="Compétence">
-            <input class="form-control champ-cv" name="niveau[]" placeholder="Niveau">
+            <input class="form-control champ-cv mb-2" name="niveau[]" placeholder="Niveau">
+
+            <button type="button" class="btn btn-sm btn-danger w-100 btn-supprimer">
+                Supprimer cette compétence
+            </button>
         </div>
     `);
 
@@ -133,8 +147,15 @@ function afficherCompetences() {
 }
 
 function activerEcouteurs() {
-    document.querySelectorAll(".champ-cv").forEach(champ => {
+    document.querySelectorAll(".champ-cv").forEach(champ => {java
         champ.removeEventListener("input", mettreAJourApercu);
         champ.addEventListener("input", mettreAJourApercu);
     });
 }
+
+document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("btn-supprimer")) {
+        e.target.closest(".border").remove();
+        mettreAJourApercu();
+    }
+});
