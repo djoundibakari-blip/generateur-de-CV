@@ -4,20 +4,18 @@ document.addEventListener("DOMContentLoaded", () => {
         champ.addEventListener("input", mettreAJourApercu);
     });
 
-    const btnExp = document.getElementById("btn-ajout-experience");
-    const btnForm = document.getElementById("btn-ajout-formation");
-    const btnComp = document.getElementById("btn-ajout-competence");
-
-    if (btnExp) btnExp.addEventListener("click", ajouterExperience);
-    if (btnForm) btnForm.addEventListener("click", ajouterFormation);
-    if (btnComp) btnComp.addEventListener("click", ajouterCompetence);
+    document.getElementById("btn-ajout-experience").addEventListener("click", ajouterExperience);
+    document.getElementById("btn-ajout-formation").addEventListener("click", ajouterFormation);
+    document.getElementById("btn-ajout-competence").addEventListener("click", ajouterCompetence);
 
     mettreAJourApercu();
 });
 
-function mettreAJourApercu() {
-    const get = name => document.querySelector(`[name="${name}"]`)?.value || "";
+function get(name) {
+    return document.querySelector(`[name="${name}"]`)?.value || "";
+}
 
+function mettreAJourApercu() {
     document.getElementById("apercu-nom").textContent =
         (get("prenom") + " " + get("nom")).trim() || "Prénom Nom";
 
@@ -25,65 +23,64 @@ function mettreAJourApercu() {
         get("headline") || "Titre professionnel";
 
     document.getElementById("apercu-contact").textContent =
-        (get("email") + " | " + get("telephone")).trim();
+        [get("email"), get("telephone")].filter(Boolean).join(" | ");
 
     document.getElementById("apercu-resume").textContent =
-        get("resume") || "Votre résumé apparaîtra ici";
+        get("resume") || "Votre résumé professionnel apparaîtra ici...";
 
     afficherExperiences();
     afficherFormations();
     afficherCompetences();
 }
 
+/* AJOUTS */
+
 function ajouterExperience() {
-    document.getElementById("bloc-experiences").insertAdjacentHTML("beforeend", `
-        <div class="border p-2 mb-2">
-            <input class="form-control mb-1 champ-cv" name="poste[]" placeholder="Poste">
-            <input class="form-control mb-1 champ-cv" name="entreprise[]" placeholder="Entreprise">
-            <input class="form-control mb-1 champ-cv" name="debut_exp[]" placeholder="Début">
-            <input class="form-control mb-1 champ-cv" name="fin_exp[]" placeholder="Fin">
-            <textarea class="form-control champ-cv mb-2" name="description_exp[]" placeholder="Description"></textarea>
-
-            <button type="button" class="btn btn-sm btn-danger w-100 btn-supprimer">
-                Supprimer cette expérience
-            </button>
-        </div>
-    `);
-
-    activerEcouteurs();
+    ajouterBloc("bloc-experiences", `
+        <input class="form-control mb-1 champ-cv" name="poste[]" placeholder="Poste">
+        <input class="form-control mb-1 champ-cv" name="entreprise[]" placeholder="Entreprise">
+        <input class="form-control mb-1 champ-cv" name="debut_exp[]" placeholder="Début">
+        <input class="form-control mb-1 champ-cv" name="fin_exp[]" placeholder="Fin">
+        <textarea class="form-control mb-1 champ-cv" name="description_exp[]" placeholder="Description"></textarea>
+    `, "Supprimer l’expérience");
 }
 
 function ajouterFormation() {
-    document.getElementById("bloc-formations").insertAdjacentHTML("beforeend", `
-        <div class="border p-2 mb-2">
-            <input class="form-control mb-1 champ-cv" name="diplome[]" placeholder="Diplôme">
-            <input class="form-control mb-1 champ-cv" name="ecole[]" placeholder="Établissement">
-            <input class="form-control mb-1 champ-cv" name="debut_form[]" placeholder="Début">
-            <input class="form-control champ-cv mb-2" name="fin_form[]" placeholder="Fin">
-
-            <button type="button" class="btn btn-sm btn-danger w-100 btn-supprimer">
-                Supprimer cette formation
-            </button>
-        </div>
-    `);
-
-    activerEcouteurs();
+    ajouterBloc("bloc-formations", `
+        <input class="form-control mb-1 champ-cv" name="diplome[]" placeholder="Diplôme">
+        <input class="form-control mb-1 champ-cv" name="ecole[]" placeholder="Établissement">
+        <input class="form-control mb-1 champ-cv" name="debut_form[]" placeholder="Début">
+        <input class="form-control mb-1 champ-cv" name="fin_form[]" placeholder="Fin">
+    `, "Supprimer la formation");
 }
 
 function ajouterCompetence() {
-    document.getElementById("bloc-competences").insertAdjacentHTML("beforeend", `
-        <div class="border p-2 mb-2">
-            <input class="form-control mb-1 champ-cv" name="competence[]" placeholder="Compétence">
-            <input class="form-control champ-cv mb-2" name="niveau[]" placeholder="Niveau">
+    ajouterBloc("bloc-competences", `
+        <input class="form-control mb-1 champ-cv" name="competence[]" placeholder="Compétence">
+        <input class="form-control mb-1 champ-cv" name="niveau[]" placeholder="Niveau">
+    `, "Supprimer la compétence");
+}
 
-            <button type="button" class="btn btn-sm btn-danger w-100 btn-supprimer">
-                Supprimer cette compétence
+/* BLOC GÉNÉRIQUE */
+
+function ajouterBloc(containerId, champsHTML, labelBtn) {
+    document.getElementById(containerId).insertAdjacentHTML("beforeend", `
+        <div class="border rounded p-2 mb-2 bloc-cv bg-white">
+            ${champsHTML}
+            <button type="button" class="btn btn-danger btn-sm mt-1" onclick="supprimerBloc(this)">
+                ${labelBtn}
             </button>
         </div>
     `);
-
     activerEcouteurs();
 }
+
+function supprimerBloc(btn) {
+    btn.closest(".bloc-cv").remove();
+    mettreAJourApercu();
+}
+
+/* AFFICHAGE APERÇU */
 
 function afficherExperiences() {
     const postes = document.querySelectorAll('[name="poste[]"]');
@@ -92,21 +89,14 @@ function afficherExperiences() {
     const fins = document.querySelectorAll('[name="fin_exp[]"]');
     const descriptions = document.querySelectorAll('[name="description_exp[]"]');
 
-    let html = "";
-
-    postes.forEach((_, i) => {
-        if (postes[i].value || entreprises[i].value || descriptions[i].value) {
-            html += `
-                <div>
-                    <strong>${postes[i].value}</strong> - ${entreprises[i].value}<br>
-                    ${debuts[i].value} - ${fins[i].value}<br>
-                    ${descriptions[i].value}
-                </div>
-            `;
-        }
-    });
-
-    document.getElementById("apercu-experiences").innerHTML = html;
+    document.getElementById("apercu-experiences").innerHTML = [...postes].map((_, i) =>
+        postes[i].value ? `
+        <div class="mb-2">
+            <strong>${postes[i].value}</strong> – ${entreprises[i].value}<br>
+            <small>${debuts[i].value} - ${fins[i].value}</small><br>
+            ${descriptions[i].value}
+        </div>` : ""
+    ).join("");
 }
 
 function afficherFormations() {
@@ -115,47 +105,27 @@ function afficherFormations() {
     const debuts = document.querySelectorAll('[name="debut_form[]"]');
     const fins = document.querySelectorAll('[name="fin_form[]"]');
 
-    let html = "";
-
-    diplomes.forEach((_, i) => {
-        if (diplomes[i].value || ecoles[i].value) {
-            html += `
-                <div>
-                    <strong>${diplomes[i].value}</strong> - ${ecoles[i].value}<br>
-                    ${debuts[i].value} - ${fins[i].value}
-                </div>
-            `;
-        }
-    });
-
-    document.getElementById("apercu-formations").innerHTML = html;
+    document.getElementById("apercu-formations").innerHTML = [...diplomes].map((_, i) =>
+        diplomes[i].value ? `
+        <div class="mb-2">
+            <strong>${diplomes[i].value}</strong> – ${ecoles[i].value}<br>
+            <small>${debuts[i].value} - ${fins[i].value}</small>
+        </div>` : ""
+    ).join("");
 }
 
 function afficherCompetences() {
     const competences = document.querySelectorAll('[name="competence[]"]');
     const niveaux = document.querySelectorAll('[name="niveau[]"]');
 
-    let html = "";
-
-    competences.forEach((_, i) => {
-        if (competences[i].value) {
-            html += `<li>${competences[i].value} (${niveaux[i].value})</li>`;
-        }
-    });
-
-    document.getElementById("apercu-competences").innerHTML = html;
+    document.getElementById("apercu-competences").innerHTML = [...competences].map((_, i) =>
+        competences[i].value ? `<li>${competences[i].value} (${niveaux[i].value})</li>` : ""
+    ).join("");
 }
 
 function activerEcouteurs() {
-    document.querySelectorAll(".champ-cv").forEach(champ => {java
+    document.querySelectorAll(".champ-cv").forEach(champ => {
         champ.removeEventListener("input", mettreAJourApercu);
         champ.addEventListener("input", mettreAJourApercu);
     });
 }
-
-document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("btn-supprimer")) {
-        e.target.closest(".border").remove();
-        mettreAJourApercu();
-    }
-});
