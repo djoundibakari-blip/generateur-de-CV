@@ -15,7 +15,7 @@ $experiences = [];
 if (!empty($_POST['poste'])) {
     for ($i = 0; $i < count($_POST['poste']); $i++) {
         $experiences[] = [
-            'poste' => $_POST['poste'][$i] ?? '',
+            'poste' => $_POST[' poste'][$i] ?? '',
             'entreprise' => $_POST['entreprise'][$i] ?? '',
             'debut' => $_POST['debut_exp'][$i] ?? '',
             'fin' => $_POST['fin_exp'][$i] ?? '',

@@ -33,7 +33,7 @@
 <ul>
     <?php foreach ($competences as $c): ?>
         <li><?= htmlspecialchars($c['nom']) ?> (<?= htmlspecialchars($c['niveau']) ?>)</li>
-    <?php endforeach; ?>
+    <?php endforeach ; ?>
 </ul>
 
 </body>
