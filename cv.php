@@ -29,6 +29,7 @@
     </p>
 <?php endforeach; ?>
 
+
 <div class="section">Compétences</div>
 <ul>
     <?php foreach ($competences as $c): ?>
