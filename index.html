@@ -3,46 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <title>Générateur de CV</title>
-
-  <!-- Bootstrap 3 -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
 
 <body style="background:#f5f7fa">
 
 <div class="container">
-
-  <!-- HEADER -->
   <div class="text-center" style="margin:30px 0">
     <h1>Générateur de CV</h1>
     <p>Créez votre CV professionnel en quelques minutes</p>
   </div>
-
   <form method="POST" action="export.php">
-
     <div class="row">
-
-      <!-- COLONNE GAUCHE -->
       <div class="col-md-6">
-
         <div class="panel panel-default">
           <div class="panel-heading">
             <strong>Informations du CV</strong>
           </div>
-
           <div class="panel-body">
-
-            <!-- ONGLET -->
             <ul class="nav nav-tabs" id="cv-tabs" style="margin-bottom:15px">
               <li class="active"><a href="#" data-tab="personnel">Personnel</a></li>
               <li><a href="#" data-tab="experience">Expérience</a></li>
               <li><a href="#" data-tab="formation">Formation</a></li>
               <li><a href="#" data-tab="competences">Compétences</a></li>
             </ul>
-
-            <!-- ================= PERSONNEL ================= -->
             <div class="tab-content-cv" id="tab-personnel">
-
               <div class="form-group">
                 <label>Prénom</label>
                 <input type="text" class="form-control champ-cv" name="prenom">
@@ -80,7 +65,7 @@
 
             </div>
 
-            <!-- ================= EXPÉRIENCE ================= -->
+            <!-- EXPÉRIENCE  -->
             <div class="tab-content-cv" id="tab-experience" style="display:none">
               <h4>Expériences</h4>
               <div id="bloc-experiences"></div>
@@ -89,7 +74,7 @@
               </button>
             </div>
 
-            <!-- ================= FORMATION ================= -->
+            <!-- FORMATION  -->
             <div class="tab-content-cv" id="tab-formation" style="display:none">
               <h4>Formations</h4>
               <div id="bloc-formations"></div>
@@ -98,7 +83,7 @@
               </button>
             </div>
 
-            <!-- ================= COMPÉTENCES ================= -->
+            <!--COMPÉTENCES-->
             <div class="tab-content-cv" id="tab-competences" style="display:none">
               <h4>Compétences</h4>
               <div id="bloc-competences"></div>
