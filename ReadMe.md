@@ -76,10 +76,3 @@ Un fichier README expliquant l'installation et l'utilisation.
 Projet realise dans le cadre du cursus EPITECH.
 
 
-/projet-cv
-│
-├── index.html        ← interface + formulaire
-├── script.js         ← logique JS (ajout, suppression, aperçu)
-├── export.php        ← génération du PDF
-├── cv.php            ← template HTML du CV pour Dompdf
-├── vendor/           ← Dompdf (composer)
