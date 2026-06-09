@@ -1,141 +1,18 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Générateur de CV</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-</head>
-
-<body style="background:#f5f7fa">
-
-<div class="container">
-  <div class="text-center" style="margin:30px 0">
-    <h1>Générateur de CV</h1>
-    <p>Créez votre CV professionnel en quelques minutes</p>
-  </div>
-  <form method="POST" action="export.php">
-    <div class="row">
-      <div class="col-md-6">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <strong>Informations du CV</strong>
-          </div>
-          <div class="panel-body">
-            <ul class="nav nav-tabs" id="cv-tabs" style="margin-bottom:15px">
-              <li class="active"><a href="#" data-tab="personnel">Personnel</a></li>
-              <li><a href="#" data-tab="experience">Expérience</a></li>
-              <li><a href="#" data-tab="formation">Formation</a></li>
-              <li><a href="#" data-tab="competences">Compétences</a></li>
-            </ul>
-            <div class="tab-content-cv" id="tab-personnel">
-              <div class="form-group">
-                <label>Prénom</label>
-                <input type="text" class="form-control champ-cv" name="prenom">
-              </div>
-
-              <div class="form-group">
-                <label>Nom</label>
-                <input type="text" class="form-control champ-cv" name="nom">
-              </div>
-
-              <div class="form-group">
-                <label>Titre professionnel</label>
-                <input type="text" class="form-control champ-cv" name="headline">
-              </div>
-
-              <div class="row">
-                <div class="col-xs-6">
-                  <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" class="form-control champ-cv" name="email">
-                  </div>
-                </div>
-                <div class="col-xs-6">
-                  <div class="form-group">
-                    <label>Téléphone</label>
-                    <input type="text" class="form-control champ-cv" name="telephone">
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>Résumé professionnel</label>
-                <textarea class="form-control champ-cv" name="resume" rows="3"></textarea>
-              </div>
-
-            </div>
-
-            <!-- EXPÉRIENCE  -->
-            <div class="tab-content-cv" id="tab-experience" style="display:none">
-              <h4>Expériences</h4>
-              <div id="bloc-experiences"></div>
-              <button type="button" id="btn-ajout-experience" class="btn btn-default btn-sm">
-                + Ajouter une expérience
-              </button>
-            </div>
-
-            <!-- FORMATION  -->
-            <div class="tab-content-cv" id="tab-formation" style="display:none">
-              <h4>Formations</h4>
-              <div id="bloc-formations"></div>
-              <button type="button" id="btn-ajout-formation" class="btn btn-default btn-sm">
-                + Ajouter une formation
-              </button>
-            </div>
-
-            <!--COMPÉTENCES-->
-            <div class="tab-content-cv" id="tab-competences" style="display:none">
-              <h4>Compétences</h4>
-              <div id="bloc-competences"></div>
-              <button type="button" id="btn-ajout-competence" class="btn btn-default btn-sm">
-                + Ajouter une compétence
-              </button>
-            </div>
-
-            <hr>
-
-            <button type="submit" class="btn btn-success btn-block">
-              Télécharger le CV en PDF
-            </button>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- COLONNE DROITE -->
-      <div class="col-md-6">
-        <div class="panel panel-info">
-          <div class="panel-heading">
-            <strong>Aperçu</strong>
-          </div>
-          <div class="panel-body">
-
-            <h2 id="apercu-nom"></h2>
-            <h4 id="apercu-titre" class="text-muted"></h4>
-            <p id="apercu-contact"></p>
-
-            <p id="apercu-resume"></p>
-
-            <h4>Expériences</h4>
-            <div id="apercu-experiences"></div>
-
-            <h4>Formations</h4>
-            <div id="apercu-formations"></div>
-
-            <h4>Compétences</h4>
-            <ul id="apercu-competences"></ul>
-
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </form>
-</div>
-
-<script src="script.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Générateur de CV</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
-
-
-
