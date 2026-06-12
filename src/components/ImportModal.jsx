@@ -28,8 +28,9 @@ function CountField({ label, count }) {
 export default function ImportModal({ onClose, onApply }) {
   const [text, setText]       = useState('')
   const [parsed, setParsed]   = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [dragOver, setDragOver] = useState(false)
+  const [loading, setLoading]     = useState(false)
+  const [loadingMsg, setLoadingMsg] = useState('')
+  const [dragOver, setDragOver]   = useState(false)
   const fileRef = useRef()
 
   const analyze = () => setParsed(parseCV(text))
@@ -38,6 +39,9 @@ export default function ImportModal({ onClose, onApply }) {
 
   const handleFile = async (file) => {
     if (!file) return
+    const ext = file.name.split('.').pop().toLowerCase()
+    const isImage = ['png', 'jpg', 'jpeg', 'webp'].includes(ext)
+    setLoadingMsg(isImage ? 'Reconnaissance du texte (OCR)…' : 'Extraction en cours…')
     setLoading(true)
     try {
       const extracted = await extractTextFromFile(file)
@@ -92,14 +96,17 @@ export default function ImportModal({ onClose, onApply }) {
               <input
                 ref={fileRef}
                 type="file"
-                accept=".pdf,.docx,.txt"
+                accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.webp"
                 style={{ display: 'none' }}
                 onChange={e => handleFile(e.target.files[0])}
               />
               {loading ? (
                 <div className="dropzone-inner">
                   <span className="dropzone-spinner">⏳</span>
-                  <span className="dropzone-hint">Extraction en cours…</span>
+                  <div>
+                    <div className="dropzone-title">{loadingMsg}</div>
+                    <div className="dropzone-hint">Cela peut prendre quelques secondes…</div>
+                  </div>
                 </div>
               ) : (
                 <div className="dropzone-inner">
@@ -108,7 +115,7 @@ export default function ImportModal({ onClose, onApply }) {
                   </svg>
                   <div>
                     <div className="dropzone-title">Glisser votre CV ici ou <span className="dropzone-link">cliquer pour choisir</span></div>
-                    <div className="dropzone-hint">PDF, DOCX, TXT acceptés</div>
+                    <div className="dropzone-hint">PDF, DOCX, PNG, JPG, TXT acceptés</div>
                   </div>
                 </div>
               )}

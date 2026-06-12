@@ -35,5 +35,13 @@ export async function extractTextFromFile(file) {
     return result.value.trim()
   }
 
-  throw new Error(`Format non supporté : .${ext}. Utilisez PDF, DOCX ou TXT.`)
+  if (['png', 'jpg', 'jpeg', 'webp'].includes(ext)) {
+    const { createWorker } = await import('tesseract.js')
+    const worker = await createWorker('fra+eng')
+    const { data: { text } } = await worker.recognize(file)
+    await worker.terminate()
+    return text.trim()
+  }
+
+  throw new Error(`Format non supporté : .${ext}. Utilisez PDF, DOCX, PNG, JPG ou TXT.`)
 }
