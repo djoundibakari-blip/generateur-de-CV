@@ -40,51 +40,52 @@ function dateRange(string $debut, string $fin): string {
 <head>
 <meta charset="UTF-8">
 <style>
+  /* Moon palette: #F5D5E0 · #6667AB · #7B337E · #420D4B · #210635 */
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1F2937; }
+  body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #210635; }
 
   /* Two-column layout via table */
   .layout      { display:table; width:100%; min-height:842px; }
-  .sidebar     { display:table-cell; width:220px; background:#1E3A5F; color:#fff; padding:28px 18px; vertical-align:top; }
+  .sidebar     { display:table-cell; width:220px; background:#210635; color:#fff; padding:28px 18px; vertical-align:top; }
   .main        { display:table-cell; padding:28px 22px; vertical-align:top; background:#fff; }
 
   /* Sidebar */
   .avatar {
     width:70px; height:70px; border-radius:35px;
-    background:rgba(255,255,255,.15); border:3px solid rgba(255,255,255,.25);
+    background:rgba(245,213,224,.15); border:3px solid rgba(245,213,224,.3);
     margin:0 auto 14px; display:block;
     text-align:center; line-height:64px;
-    font-size:24px; font-weight:700; color:#fff;
+    font-size:24px; font-weight:700; color:#F5D5E0;
     overflow:hidden;
   }
   .avatar img { width:70px; height:70px; border-radius:35px; display:block; }
 
-  .sb-name     { font-size:15px; font-weight:700; text-align:center; line-height:1.3; margin-bottom:4px; word-wrap:break-word; }
-  .sb-headline { font-size:10px; color:rgba(255,255,255,.65); text-align:center; line-height:1.4; margin-bottom:16px; }
+  .sb-name     { font-size:15px; font-weight:700; text-align:center; line-height:1.3; margin-bottom:4px; word-wrap:break-word; color:#F5D5E0; }
+  .sb-headline { font-size:10px; color:rgba(245,213,224,.65); text-align:center; line-height:1.4; margin-bottom:16px; }
 
   .sb-section  { margin-bottom:18px; }
-  .sb-label    { font-size:8px; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.4); border-bottom:1px solid rgba(255,255,255,.12); padding-bottom:5px; margin-bottom:8px; }
+  .sb-label    { font-size:8px; text-transform:uppercase; letter-spacing:1.2px; color:rgba(102,103,171,.7); border-bottom:1px solid rgba(102,103,171,.25); padding-bottom:5px; margin-bottom:8px; }
 
-  .contact-row { font-size:10px; color:rgba(255,255,255,.8); margin-bottom:5px; word-wrap:break-word; }
+  .contact-row { font-size:10px; color:rgba(245,213,224,.8); margin-bottom:5px; word-wrap:break-word; }
 
   .skill-row   { margin-bottom:7px; }
-  .skill-name  { font-size:10px; color:rgba(255,255,255,.9); }
-  .skill-level { font-size:8px; color:rgba(255,255,255,.45); background:rgba(255,255,255,.08); padding:1px 5px; border-radius:3px; }
+  .skill-name  { font-size:10px; color:rgba(245,213,224,.9); }
+  .skill-level { font-size:8px; color:#6667AB; background:rgba(102,103,171,.15); padding:1px 5px; border-radius:3px; }
 
   /* Main content */
   .section     { margin-bottom:20px; }
-  .sec-title   { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; font-weight:700; color:#1E3A5F; margin-bottom:5px; }
-  .sec-rule    { height:2px; background:#1E3A5F; border-radius:1px; margin-bottom:12px; }
-  .profile-txt { font-size:11px; line-height:1.7; color:#374151; }
+  .sec-title   { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; font-weight:700; color:#420D4B; margin-bottom:5px; }
+  .sec-rule    { height:2px; background:#7B337E; border-radius:1px; margin-bottom:12px; }
+  .profile-txt { font-size:11px; line-height:1.7; color:#3D1A45; }
 
-  .entry       { margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #F3F4F6; }
+  .entry       { margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #EDE0F0; }
   .entry:last-child { border-bottom:none; padding-bottom:0; margin-bottom:0; }
 
   .entry-head  { display:table; width:100%; margin-bottom:2px; }
-  .entry-title { display:table-cell; font-size:12px; font-weight:700; color:#111827; }
-  .entry-date  { display:table-cell; text-align:right; font-size:9px; color:#3B82F6; font-weight:600; white-space:nowrap; }
-  .entry-org   { font-size:10px; color:#6B7280; font-weight:500; margin-bottom:3px; }
-  .entry-desc  { font-size:10px; color:#4B5563; line-height:1.65; margin-top:4px; }
+  .entry-title { display:table-cell; font-size:12px; font-weight:700; color:#210635; }
+  .entry-date  { display:table-cell; text-align:right; font-size:9px; color:#6667AB; font-weight:600; white-space:nowrap; }
+  .entry-org   { font-size:10px; color:#7B337E; font-weight:500; margin-bottom:3px; }
+  .entry-desc  { font-size:10px; color:#5C3063; line-height:1.65; margin-top:4px; }
 </style>
 </head>
 <body>

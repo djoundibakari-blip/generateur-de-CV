@@ -1,24 +1,25 @@
-/* ─── Design Tokens ─────────────────────────────────────────────────── */
+/* ─── Design Tokens — Moon Dark ──────────────────────────────────────── */
+/* #F5D5E0 · #6667AB · #7B337E · #420D4B · #210635 sur fond noir         */
 :root {
-  --primary:        #2563EB;
-  --primary-dark:   #1D4ED8;
-  --primary-soft:   #DBEAFE;
-  --text:           #0F172A;
-  --text-muted:     #64748B;
-  --border:         #E2E8F0;
-  --bg:             #F1F5F9;
-  --white:          #FFFFFF;
-  --danger:         #EF4444;
-  --danger-soft:    #FEE2E2;
-  --success:        #10B981;
+  --primary:        #9B59B6;
+  --primary-dark:   #7B337E;
+  --primary-soft:   rgba(123,51,126,.18);
+  --text:           #F0E6F6;
+  --text-muted:     #8B7FA8;
+  --border:         #2A1A35;
+  --bg:             #0A0A0A;
+  --white:          #141020;
+  --danger:         #E05C5C;
+  --danger-soft:    rgba(224,92,92,.15);
+  --success:        #6667AB;
 
-  --cv-sidebar:     #1E3A5F;
-  --cv-accent:      #3B82F6;
+  --cv-sidebar:     #210635;
+  --cv-accent:      #9B8FD4;
 
   --r:   12px;
   --r-s: 8px;
-  --shadow:    0 1px 3px rgba(0,0,0,.07), 0 8px 24px rgba(0,0,0,.06);
-  --shadow-lg: 0 4px 16px rgba(0,0,0,.09), 0 24px 64px rgba(0,0,0,.13);
+  --shadow:    0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,.5), 0 24px 64px rgba(0,0,0,.45);
   --ease: 150ms ease;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -40,11 +41,11 @@ body {
 .app-header {
   position: sticky; top: 0; z-index: 200;
   height: 60px;
-  background: var(--white);
+  background: #0F0A14;
   border-bottom: 1px solid var(--border);
   padding: 0 28px;
   display: flex; align-items: center; justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  box-shadow: 0 1px 8px rgba(123,51,126,.08);
 }
 
 .header-brand { display: flex; align-items: center; gap: 10px; }
@@ -68,9 +69,9 @@ body {
   padding: 9px 18px; font-size: 13px; font-weight: 600;
   cursor: pointer; font-family: var(--font);
   transition: background var(--ease), transform var(--ease), box-shadow var(--ease);
-  box-shadow: 0 2px 8px rgba(37,99,235,.35);
+  box-shadow: 0 2px 8px rgba(123,51,126,.35);
 }
-.btn-export:hover  { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,.45); }
+.btn-export:hover  { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(123,51,126,.45); }
 .btn-export:active { transform: translateY(0); }
 .btn-export:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 .btn-export svg { flex-shrink: 0; }
@@ -103,7 +104,7 @@ body {
 .tab-nav {
   display: grid; grid-template-columns: repeat(4, 1fr);
   border-bottom: 1px solid var(--border);
-  background: #FAFAFA;
+  background: #110D1A;
   flex-shrink: 0;
 }
 
@@ -163,7 +164,7 @@ body {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-soft);
 }
-.field-input::placeholder { color: #CBD5E1; }
+.field-input::placeholder { color: #4A3A5A; }
 .field-input.error { border-color: var(--danger); }
 .field-input.error:focus { box-shadow: 0 0 0 3px var(--danger-soft); }
 
@@ -213,7 +214,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 /* Item card */
 .item-card {
   border: 1.5px solid var(--border); border-radius: var(--r-s);
-  padding: 16px; margin-bottom: 10px; background: #FAFBFF;
+  padding: 16px; margin-bottom: 10px; background: #1A1025;
   animation: fadeSlideIn 200ms ease;
 }
 @keyframes fadeSlideIn {
@@ -353,14 +354,14 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 
 .cv-entry {
   margin-bottom: 12px; padding-bottom: 12px;
-  border-bottom: 1px solid #F3F4F6;
+  border-bottom: 1px solid #EDE0F0;
 }
 .cv-entry:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
 .cv-entry-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 1px; }
 .cv-entry-title { font-size: 13px; font-weight: 700; color: #111827; }
 .cv-entry-date  { font-size: 10px; color: var(--cv-accent); white-space: nowrap; font-weight: 600; flex-shrink: 0; }
-.cv-entry-org   { font-size: 11px; color: #6B7280; margin-bottom: 3px; font-weight: 500; }
+.cv-entry-org   { font-size: 11px; color: #7B337E; margin-bottom: 3px; font-weight: 500; }
 .cv-entry-desc  { font-size: 11px; color: #4B5563; line-height: 1.65; margin-top: 4px; }
 
 /* Placeholder when CV is empty */
@@ -368,7 +369,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   grid-column: 1 / -1;
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; min-height: 500px;
-  color: #CBD5E1; text-align: center; gap: 10px;
+  color: #4A3A5A; text-align: center; gap: 10px;
 }
 .cv-placeholder-icon { font-size: 52px; }
 .cv-placeholder-text { font-size: 13px; max-width: 200px; line-height: 1.5; }
