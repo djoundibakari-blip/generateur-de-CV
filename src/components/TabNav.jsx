@@ -9,7 +9,7 @@ function isComplete(tab, cv) {
   if (tab === 'personal')   return !!(cv.personal.prenom || cv.personal.nom)
   if (tab === 'experience') return cv.experiences.some(e => e.poste)
   if (tab === 'education')  return cv.formations.some(f => f.diplome)
-  if (tab === 'skills')     return cv.competences.some(c => c.nom)
+  if (tab === 'skills')     return cv.competences.some(c => c.nom) || (cv.qualites||[]).some(q => q.nom) || (cv.langues||[]).some(l => l.nom) || (cv.passions||[]).some(p => p.nom)
   return false
 }
 

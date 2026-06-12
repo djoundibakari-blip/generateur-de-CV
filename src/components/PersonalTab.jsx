@@ -83,6 +83,25 @@ export default function PersonalTab({ data, onChange }) {
         </div>
       </div>
 
+      <div className="row-2">
+        <div className="field">
+          <label className="field-label">Ville / Localisation</label>
+          <input
+            type="text" className="field-input"
+            placeholder="ex : Lyon / FRANCE" value={data.localisation || ''}
+            onChange={e => onChange('localisation', e.target.value)}
+          />
+        </div>
+        <div className="field">
+          <label className="field-label">GitHub / Portfolio</label>
+          <input
+            type="text" className="field-input"
+            placeholder="github.com/username" value={data.github || ''}
+            onChange={e => onChange('github', e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="field">
         <label className="field-label">Résumé professionnel</label>
         <textarea

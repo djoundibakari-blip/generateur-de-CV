@@ -9,12 +9,14 @@ function clean(string $v): string {
 }
 
 /* ── Personal ── */
-$prenom    = clean($_POST['prenom']    ?? '');
-$nom       = clean($_POST['nom']       ?? '');
-$headline  = clean($_POST['headline']  ?? '');
-$email     = clean($_POST['email']     ?? '');
-$telephone = clean($_POST['telephone'] ?? '');
-$resume    = clean($_POST['resume']    ?? '');
+$prenom       = clean($_POST['prenom']       ?? '');
+$nom          = clean($_POST['nom']          ?? '');
+$headline     = clean($_POST['headline']     ?? '');
+$email        = clean($_POST['email']        ?? '');
+$telephone    = clean($_POST['telephone']    ?? '');
+$resume       = clean($_POST['resume']       ?? '');
+$localisation = clean($_POST['localisation'] ?? '');
+$github       = clean($_POST['github']       ?? '');
 
 /* ── Arrays ── */
 $postes         = $_POST['poste']           ?? [];
@@ -29,17 +31,21 @@ $debut_form_arr = $_POST['debut_form']        ?? [];
 $fin_form_arr   = $_POST['fin_form']          ?? [];
 $desc_form_arr  = $_POST['description_form']  ?? [];
 
-$comp_arr   = $_POST['competence'] ?? [];
-$niveau_arr = $_POST['niveau']     ?? [];
+$comp_arr        = $_POST['competence']    ?? [];
+$niveau_arr      = $_POST['niveau']        ?? [];
+$qualite_arr     = $_POST['qualite']       ?? [];
+$langue_arr      = $_POST['langue']        ?? [];
+$langue_niv_arr  = $_POST['langue_niveau'] ?? [];
+$passion_arr     = $_POST['passion']       ?? [];
 
-/* ── Build structured data for the template ── */
+/* ── Build structured data ── */
 $experiences = [];
 foreach ($postes as $i => $poste) {
     $experiences[] = [
         'poste'       => clean($poste),
-        'entreprise'  => clean($entreprises[$i]   ?? ''),
-        'debut'       => clean($debut_exp_arr[$i]  ?? ''),
-        'fin'         => clean($fin_exp_arr[$i]    ?? ''),
+        'entreprise'  => clean($entreprises[$i]  ?? ''),
+        'debut'       => clean($debut_exp_arr[$i] ?? ''),
+        'fin'         => clean($fin_exp_arr[$i]   ?? ''),
         'description' => clean($desc_exp_arr[$i]  ?? ''),
     ];
 }
@@ -48,20 +54,33 @@ $formations = [];
 foreach ($diplomes as $i => $diplome) {
     $formations[] = [
         'diplome'     => clean($diplome),
-        'ecole'       => clean($ecoles[$i]         ?? ''),
-        'debut'       => clean($debut_form_arr[$i] ?? ''),
-        'fin'         => clean($fin_form_arr[$i]   ?? ''),
-        'description' => clean($desc_form_arr[$i] ?? ''),
+        'ecole'       => clean($ecoles[$i]          ?? ''),
+        'debut'       => clean($debut_form_arr[$i]  ?? ''),
+        'fin'         => clean($fin_form_arr[$i]    ?? ''),
+        'description' => clean($desc_form_arr[$i]   ?? ''),
     ];
 }
 
 $competences = [];
-foreach ($comp_arr as $i => $nom) {
-    if (trim($nom) === '') continue;
-    $competences[] = [
-        'nom'    => clean($nom),
-        'niveau' => clean($niveau_arr[$i] ?? ''),
-    ];
+foreach ($comp_arr as $i => $nom_c) {
+    if (trim($nom_c) === '') continue;
+    $competences[] = ['nom' => clean($nom_c), 'niveau' => clean($niveau_arr[$i] ?? '')];
+}
+
+$qualites = [];
+foreach ($qualite_arr as $q) {
+    if (trim($q) !== '') $qualites[] = clean($q);
+}
+
+$langues = [];
+foreach ($langue_arr as $i => $lang) {
+    if (trim($lang) === '') continue;
+    $langues[] = ['nom' => clean($lang), 'niveau' => clean($langue_niv_arr[$i] ?? '')];
+}
+
+$passions = [];
+foreach ($passion_arr as $p) {
+    if (trim($p) !== '') $passions[] = clean($p);
 }
 
 /* ── Render HTML ── */

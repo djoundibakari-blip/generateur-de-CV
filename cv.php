@@ -1,95 +1,151 @@
 <?php
 /**
- * Template CV — inclus par export.php qui injecte les variables suivantes.
- *
- * @var string   $prenom
- * @var string   $nom
- * @var string   $headline
- * @var string   $email
- * @var string   $telephone
- * @var string   $resume
- * @var array    $experiences  [['poste','entreprise','debut','fin','description'], …]
- * @var array    $formations   [['diplome','ecole','debut','fin','description'], …]
- * @var array    $competences  [['nom','niveau'], …]
- * @var string   $photo_data   data URI optionnelle (bonus photo)
+ * @var string $prenom
+ * @var string $nom
+ * @var string $headline
+ * @var string $email
+ * @var string $telephone
+ * @var string $resume
+ * @var string $localisation
+ * @var string $github
+ * @var array  $experiences  [['poste','entreprise','debut','fin','description'], …]
+ * @var array  $formations   [['diplome','ecole','debut','fin','description'], …]
+ * @var array  $competences  [['nom','niveau'], …]
+ * @var array  $qualites     string[]
+ * @var array  $langues      [['nom','niveau'], …]
+ * @var array  $passions     string[]
  */
 
-/* Helper: format YYYY-MM to "Mois AAAA" */
 function fmtDate(string $raw): string {
     if ($raw === '') return '';
     $parts = explode('-', $raw);
     if (count($parts) === 2) {
         $months = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
         $m = (int)$parts[1] - 1;
-        $label = isset($months[$m]) ? $months[$m] . ' ' . $parts[0] : $raw;
-    } else {
-        $label = $raw;
+        return (isset($months[$m]) ? $months[$m] . ' ' : '') . $parts[0];
     }
-    return $label;
+    return $raw;
 }
 
 function dateRange(string $debut, string $fin): string {
     $s = fmtDate($debut);
     $e = $fin !== '' ? fmtDate($fin) : 'En cours';
-    if ($s === '') return $e;
-    return $s . ' → ' . $e;
+    return $s !== '' ? "$s – $e" : $e;
 }
+
+function renderDesc(string $desc): string {
+    if ($desc === '') return '';
+    $lines = array_filter(array_map('trim', explode("\n", $desc)));
+    if (count($lines) <= 1) {
+        return '<p class="entry-desc">' . htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') . '</p>';
+    }
+    $html = '<ul class="entry-list">';
+    foreach ($lines as $line) {
+        $line = preg_replace('/^[•\-\*]\s*/', '', $line);
+        $html .= '<li>' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</li>';
+    }
+    return $html . '</ul>';
+}
+/* Variables injected by export.php — defaults silence static analysis */
+$prenom       ??= '';
+$nom          ??= '';
+$headline     ??= '';
+$email        ??= '';
+$telephone    ??= '';
+$resume       ??= '';
+$localisation ??= '';
+$github       ??= '';
+$experiences  ??= [];
+$formations   ??= [];
+$competences  ??= [];
+$qualites     ??= [];
+$langues      ??= [];
+$passions     ??= [];
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <style>
-  /* Moon palette: #F5D5E0 · #6667AB · #7B337E · #420D4B · #210635 */
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #210635; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: DejaVu Sans, sans-serif; font-size:10px; color:#1a1a1a; }
 
-  /* Two-column layout via table */
-  .layout      { display:table; width:100%; min-height:842px; }
-  .sidebar     { display:table-cell; width:220px; background:#210635; color:#fff; padding:28px 18px; vertical-align:top; }
-  .main        { display:table-cell; padding:28px 22px; vertical-align:top; background:#fff; }
+/* ── Header full-width ── */
+.cv-header {
+  background:#1B2744; color:#fff;
+  padding:18px 24px 14px;
+  width:100%;
+}
+.header-name {
+  font-size:22px; font-weight:700;
+  text-transform:uppercase; letter-spacing:2px;
+  line-height:1.15; margin-bottom:4px;
+}
+.header-title {
+  font-size:9px; text-transform:uppercase;
+  letter-spacing:2.5px; color:rgba(255,255,255,.65);
+}
 
-  /* Sidebar */
-  .avatar {
-    width:70px; height:70px; border-radius:35px;
-    background:rgba(245,213,224,.15); border:3px solid rgba(245,213,224,.3);
-    margin:0 auto 14px; display:block;
-    text-align:center; line-height:64px;
-    font-size:24px; font-weight:700; color:#F5D5E0;
-    overflow:hidden;
-  }
-  .avatar img { width:70px; height:70px; border-radius:35px; display:block; }
+/* ── Body: display:table two-column ── */
+.body-table { display:table; width:100%; }
+.sidebar    { display:table-cell; width:190px; background:#1B2744; color:#fff; padding:18px 12px; vertical-align:top; }
+.main       { display:table-cell; padding:16px 18px; vertical-align:top; background:#fff; }
 
-  .sb-name     { font-size:15px; font-weight:700; text-align:center; line-height:1.3; margin-bottom:4px; word-wrap:break-word; color:#F5D5E0; }
-  .sb-headline { font-size:10px; color:rgba(245,213,224,.65); text-align:center; line-height:1.4; margin-bottom:16px; }
+/* Sidebar elements */
+.avatar {
+  width:80px; height:80px; border-radius:40px;
+  background:rgba(255,255,255,.12); border:3px solid rgba(255,255,255,.25);
+  margin:0 auto 14px; display:block;
+  text-align:center; line-height:74px;
+  font-size:22px; font-weight:700; color:#fff;
+  overflow:hidden;
+}
+.avatar img { width:80px; height:80px; border-radius:40px; display:block; }
 
-  .sb-section  { margin-bottom:18px; }
-  .sb-label    { font-size:8px; text-transform:uppercase; letter-spacing:1.2px; color:rgba(102,103,171,.7); border-bottom:1px solid rgba(102,103,171,.25); padding-bottom:5px; margin-bottom:8px; }
+.sb-section { margin-bottom:14px; }
+.sb-label {
+  font-size:7.5px; text-transform:uppercase; letter-spacing:1.3px;
+  color:rgba(255,255,255,.48); font-weight:700;
+  border-bottom:1px solid rgba(255,255,255,.14);
+  padding-bottom:4px; margin-bottom:6px;
+}
+.sb-item  { font-size:8.5px; color:rgba(255,255,255,.82); margin-bottom:4px; line-height:1.5; word-wrap:break-word; }
+.sb-bullet { font-size:8.5px; color:rgba(255,255,255,.85); margin-bottom:3px; line-height:1.45; }
 
-  .contact-row { font-size:10px; color:rgba(245,213,224,.8); margin-bottom:5px; word-wrap:break-word; }
+/* Main sections */
+.section { margin-bottom:16px; }
+.sec-heading {
+  font-size:9.5px; text-transform:uppercase; letter-spacing:1.4px;
+  font-weight:700; color:#1B2744; margin-bottom:4px;
+}
+.sec-rule { height:2px; background:#4BAFC8; border-radius:1px; margin-bottom:10px; }
 
-  .skill-row   { margin-bottom:7px; }
-  .skill-name  { font-size:10px; color:rgba(245,213,224,.9); }
-  .skill-level { font-size:8px; color:#6667AB; background:rgba(102,103,171,.15); padding:1px 5px; border-radius:3px; }
+.profile-txt { font-size:9.5px; line-height:1.75; color:#374151; }
 
-  /* Main content */
-  .section     { margin-bottom:20px; }
-  .sec-title   { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; font-weight:700; color:#420D4B; margin-bottom:5px; }
-  .sec-rule    { height:2px; background:#7B337E; border-radius:1px; margin-bottom:12px; }
-  .profile-txt { font-size:11px; line-height:1.7; color:#3D1A45; }
+.entry { margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #EEF0F4; }
+.entry:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
 
-  .entry       { margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #EDE0F0; }
-  .entry:last-child { border-bottom:none; padding-bottom:0; margin-bottom:0; }
+.entry-head  { display:table; width:100%; margin-bottom:2px; }
+.entry-title { display:table-cell; font-size:10px; font-weight:700; color:#111827; }
+.entry-date  { display:table-cell; text-align:right; font-size:8px; color:#4BAFC8; font-weight:600; white-space:nowrap; }
 
-  .entry-head  { display:table; width:100%; margin-bottom:2px; }
-  .entry-title { display:table-cell; font-size:12px; font-weight:700; color:#210635; }
-  .entry-date  { display:table-cell; text-align:right; font-size:9px; color:#6667AB; font-weight:600; white-space:nowrap; }
-  .entry-org   { font-size:10px; color:#7B337E; font-weight:500; margin-bottom:3px; }
-  .entry-desc  { font-size:10px; color:#5C3063; line-height:1.65; margin-top:4px; }
+.entry-desc { font-size:9px; color:#4B5563; line-height:1.65; margin-top:3px; }
+.entry-list { margin-top:4px; padding-left:12px; font-size:9px; color:#4B5563; line-height:1.65; }
+.entry-list li { margin-bottom:1px; }
 </style>
 </head>
 <body>
-<div class="layout">
+
+<!-- Header -->
+<div class="cv-header">
+  <div class="header-name"><?= $prenom ?> <?= $nom ?></div>
+  <?php if ($headline !== ''): ?>
+    <div class="header-title"><?= $headline ?></div>
+  <?php endif; ?>
+</div>
+
+<!-- Body -->
+<div class="body-table">
 
   <!-- Sidebar -->
   <div class="sidebar">
@@ -101,18 +157,13 @@ function dateRange(string $debut, string $fin): string {
       <?php endif; ?>
     </div>
 
-    <?php if ($prenom !== '' || $nom !== ''): ?>
-      <div class="sb-name"><?= $prenom ?> <?= $nom ?></div>
-    <?php endif; ?>
-    <?php if ($headline !== ''): ?>
-      <div class="sb-headline"><?= $headline ?></div>
-    <?php endif; ?>
-
-    <?php if ($email !== '' || $telephone !== ''): ?>
+    <?php if ($email !== '' || $telephone !== '' || $localisation !== '' || $github !== ''): ?>
     <div class="sb-section">
       <div class="sb-label">Contact</div>
-      <?php if ($email     !== ''): ?><div class="contact-row"><?= $email ?></div><?php endif; ?>
-      <?php if ($telephone !== ''): ?><div class="contact-row"><?= $telephone ?></div><?php endif; ?>
+      <?php if ($telephone    !== ''): ?><div class="sb-item">📞 <?= $telephone ?></div><?php endif; ?>
+      <?php if ($email        !== ''): ?><div class="sb-item">✉ <?= $email ?></div><?php endif; ?>
+      <?php if ($localisation !== ''): ?><div class="sb-item">📍 <?= $localisation ?></div><?php endif; ?>
+      <?php if ($github       !== ''): ?><div class="sb-item">🔗 <?= $github ?></div><?php endif; ?>
     </div>
     <?php endif; ?>
 
@@ -120,23 +171,45 @@ function dateRange(string $debut, string $fin): string {
     <div class="sb-section">
       <div class="sb-label">Compétences</div>
       <?php foreach ($competences as $c): ?>
-        <div class="skill-row">
-          <div class="skill-name"><?= $c['nom'] ?></div>
-          <?php if ($c['niveau'] !== ''): ?>
-            <span class="skill-level"><?= $c['niveau'] ?></span>
-          <?php endif; ?>
-        </div>
+        <div class="sb-bullet">• <?= $c['nom'] ?></div>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($qualites)): ?>
+    <div class="sb-section">
+      <div class="sb-label">Qualités</div>
+      <?php foreach ($qualites as $q): ?>
+        <div class="sb-bullet">• <?= $q ?></div>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($langues)): ?>
+    <div class="sb-section">
+      <div class="sb-label">Langues</div>
+      <?php foreach ($langues as $l): ?>
+        <div class="sb-bullet">• <?= $l['nom'] ?><?= $l['niveau'] !== '' ? ' (' . $l['niveau'] . ')' : '' ?></div>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($passions)): ?>
+    <div class="sb-section">
+      <div class="sb-label">Passions</div>
+      <?php foreach ($passions as $p): ?>
+        <div class="sb-bullet">• <?= $p ?></div>
       <?php endforeach; ?>
     </div>
     <?php endif; ?>
   </div>
 
-  <!-- Main content -->
+  <!-- Main -->
   <div class="main">
 
     <?php if ($resume !== ''): ?>
     <div class="section">
-      <div class="sec-title">Profil</div>
+      <div class="sec-heading">Profil</div>
       <div class="sec-rule"></div>
       <p class="profile-txt"><?= nl2br($resume) ?></p>
     </div>
@@ -144,23 +217,18 @@ function dateRange(string $debut, string $fin): string {
 
     <?php if (!empty($experiences)): ?>
     <div class="section">
-      <div class="sec-title">Expériences</div>
+      <div class="sec-heading">Expérience Professionnelle</div>
       <div class="sec-rule"></div>
       <?php foreach ($experiences as $e): ?>
         <?php if ($e['poste'] === '' && $e['entreprise'] === '') continue; ?>
         <div class="entry">
           <div class="entry-head">
-            <div class="entry-title"><?= $e['poste'] ?></div>
+            <div class="entry-title"><?= $e['poste'] ?><?= $e['entreprise'] !== '' ? ' — ' . $e['entreprise'] : '' ?></div>
             <?php if ($e['debut'] !== '' || $e['fin'] !== ''): ?>
               <div class="entry-date"><?= dateRange($e['debut'], $e['fin']) ?></div>
             <?php endif; ?>
           </div>
-          <?php if ($e['entreprise'] !== ''): ?>
-            <div class="entry-org"><?= $e['entreprise'] ?></div>
-          <?php endif; ?>
-          <?php if ($e['description'] !== ''): ?>
-            <div class="entry-desc"><?= nl2br($e['description']) ?></div>
-          <?php endif; ?>
+          <?= renderDesc($e['description']) ?>
         </div>
       <?php endforeach; ?>
     </div>
@@ -168,23 +236,18 @@ function dateRange(string $debut, string $fin): string {
 
     <?php if (!empty($formations)): ?>
     <div class="section">
-      <div class="sec-title">Formations</div>
+      <div class="sec-heading">Formation</div>
       <div class="sec-rule"></div>
       <?php foreach ($formations as $f): ?>
         <?php if ($f['diplome'] === '' && $f['ecole'] === '') continue; ?>
         <div class="entry">
           <div class="entry-head">
-            <div class="entry-title"><?= $f['diplome'] ?></div>
+            <div class="entry-title"><?= $f['diplome'] ?><?= $f['ecole'] !== '' ? ' — ' . $f['ecole'] : '' ?></div>
             <?php if ($f['debut'] !== '' || $f['fin'] !== ''): ?>
               <div class="entry-date"><?= dateRange($f['debut'], $f['fin']) ?></div>
             <?php endif; ?>
           </div>
-          <?php if ($f['ecole'] !== ''): ?>
-            <div class="entry-org"><?= $f['ecole'] ?></div>
-          <?php endif; ?>
-          <?php if ($f['description'] !== ''): ?>
-            <div class="entry-desc"><?= nl2br($f['description']) ?></div>
-          <?php endif; ?>
+          <?= renderDesc($f['description']) ?>
         </div>
       <?php endforeach; ?>
     </div>

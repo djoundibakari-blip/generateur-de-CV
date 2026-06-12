@@ -12,11 +12,15 @@ const mkId = () => crypto.randomUUID()
 const INIT = {
   personal: {
     prenom: '', nom: '', headline: '', email: '',
-    telephone: '', resume: '', photoUrl: null, photoFile: null,
+    telephone: '', resume: '', localisation: '', github: '',
+    photoUrl: null, photoFile: null,
   },
   experiences: [],
   formations: [],
   competences: [],
+  qualites: [],
+  langues: [],
+  passions: [],
 }
 
 export default function App() {
@@ -25,51 +29,67 @@ export default function App() {
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
 
-  /* ── import handler ── */
-  const handleImport = (parsed) => {
-    setCv(parsed)
-    setTab('personal')
-  }
+  const handleImport = (parsed) => { setCv(parsed); setTab('personal') }
 
-  /* ── personal ── */
+  /* personal */
   const setPersonal = (field, value) =>
     setCv(p => ({ ...p, personal: { ...p.personal, [field]: value } }))
 
-  /* ── generic list helpers ── */
-  const addItem    = (key, tpl)       => setCv(p => ({ ...p, [key]: [...p[key], { id: mkId(), ...tpl }] }))
-  const updateItem = (key, id, f, v)  => setCv(p => ({ ...p, [key]: p[key].map(x => x.id === id ? { ...x, [f]: v } : x) }))
-  const removeItem = (key, id)        => setCv(p => ({ ...p, [key]: p[key].filter(x => x.id !== id) }))
+  /* generic helpers */
+  const addItem    = (key, tpl)      => setCv(p => ({ ...p, [key]: [...p[key], { id: mkId(), ...tpl }] }))
+  const updateItem = (key, id, f, v) => setCv(p => ({ ...p, [key]: p[key].map(x => x.id === id ? { ...x, [f]: v } : x) }))
+  const removeItem = (key, id)       => setCv(p => ({ ...p, [key]: p[key].filter(x => x.id !== id) }))
 
-  /* ── experiences ── */
+  /* experiences */
   const expTpl = { poste: '', entreprise: '', debut: '', fin: '', description: '' }
   const addExp    = () => addItem('experiences', expTpl)
   const updateExp = (id, f, v) => updateItem('experiences', id, f, v)
   const removeExp = id => removeItem('experiences', id)
 
-  /* ── formations ── */
+  /* formations */
   const formTpl = { diplome: '', ecole: '', debut: '', fin: '', description: '' }
   const addForm    = () => addItem('formations', formTpl)
   const updateForm = (id, f, v) => updateItem('formations', id, f, v)
   const removeForm = id => removeItem('formations', id)
 
-  /* ── compétences ── */
+  /* compétences */
   const compTpl = { nom: '', niveau: '' }
   const addComp    = () => addItem('competences', compTpl)
   const updateComp = (id, f, v) => updateItem('competences', id, f, v)
   const removeComp = id => removeItem('competences', id)
 
-  /* ── export PDF ── */
+  /* qualités */
+  const qualTpl = { nom: '' }
+  const addQual    = () => addItem('qualites', qualTpl)
+  const updateQual = (id, f, v) => updateItem('qualites', id, f, v)
+  const removeQual = id => removeItem('qualites', id)
+
+  /* langues */
+  const langTpl = { nom: '', niveau: '' }
+  const addLang    = () => addItem('langues', langTpl)
+  const updateLang = (id, f, v) => updateItem('langues', id, f, v)
+  const removeLang = id => removeItem('langues', id)
+
+  /* passions */
+  const passTpl = { nom: '' }
+  const addPass    = () => addItem('passions', passTpl)
+  const updatePass = (id, f, v) => updateItem('passions', id, f, v)
+  const removePass = id => removeItem('passions', id)
+
+  /* export PDF */
   const exportPDF = async () => {
     setExporting(true)
     try {
       const fd = new FormData()
       const p = cv.personal
-      fd.append('prenom',    p.prenom    || '')
-      fd.append('nom',       p.nom       || '')
-      fd.append('headline',  p.headline  || '')
-      fd.append('email',     p.email     || '')
-      fd.append('telephone', p.telephone || '')
-      fd.append('resume',    p.resume    || '')
+      fd.append('prenom',       p.prenom       || '')
+      fd.append('nom',          p.nom          || '')
+      fd.append('headline',     p.headline     || '')
+      fd.append('email',        p.email        || '')
+      fd.append('telephone',    p.telephone    || '')
+      fd.append('resume',       p.resume       || '')
+      fd.append('localisation', p.localisation || '')
+      fd.append('github',       p.github       || '')
 
       cv.experiences.forEach(e => {
         fd.append('poste[]',           e.poste       || '')
@@ -80,11 +100,11 @@ export default function App() {
       })
 
       cv.formations.forEach(f => {
-        fd.append('diplome[]',           f.diplome     || '')
-        fd.append('ecole[]',             f.ecole       || '')
-        fd.append('debut_form[]',        f.debut       || '')
-        fd.append('fin_form[]',          f.fin         || '')
-        fd.append('description_form[]',  f.description || '')
+        fd.append('diplome[]',          f.diplome     || '')
+        fd.append('ecole[]',            f.ecole       || '')
+        fd.append('debut_form[]',       f.debut       || '')
+        fd.append('fin_form[]',         f.fin         || '')
+        fd.append('description_form[]', f.description || '')
       })
 
       cv.competences.forEach(c => {
@@ -92,9 +112,17 @@ export default function App() {
         fd.append('niveau[]',     c.niveau || '')
       })
 
+      cv.qualites.forEach(q => fd.append('qualite[]', q.nom || ''))
+
+      cv.langues.forEach(l => {
+        fd.append('langue[]',        l.nom    || '')
+        fd.append('langue_niveau[]', l.niveau || '')
+      })
+
+      cv.passions.forEach(p2 => fd.append('passion[]', p2.nom || ''))
+
       const res = await fetch('export.php', { method: 'POST', body: fd })
       if (!res.ok) throw new Error('Erreur serveur')
-
       const blob = await res.blob()
       const url  = URL.createObjectURL(blob)
       const a    = document.createElement('a')
@@ -111,7 +139,6 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* ── Import modal ── */}
       {importing && (
         <ImportModal
           onClose={() => setImporting(false)}
@@ -119,7 +146,6 @@ export default function App() {
         />
       )}
 
-      {/* ── Header ── */}
       <header className="app-header">
         <div className="header-brand">
           <div className="brand-icon">CV</div>
@@ -141,20 +167,24 @@ export default function App() {
         </div>
       </header>
 
-      {/* ── Body ── */}
       <main className="app-body">
-        {/* Form panel */}
         <section className="form-panel">
           <TabNav active={tab} onChange={setTab} cv={cv} />
           <div className="tab-body">
-            {tab === 'personal'    && <PersonalTab    data={cv.personal}     onChange={setPersonal} />}
-            {tab === 'experience'  && <ExperienceTab  items={cv.experiences} onAdd={addExp}  onUpdate={updateExp}  onRemove={removeExp}  />}
-            {tab === 'education'   && <EducationTab   items={cv.formations}  onAdd={addForm} onUpdate={updateForm} onRemove={removeForm} />}
-            {tab === 'skills'      && <SkillsTab      items={cv.competences} onAdd={addComp} onUpdate={updateComp} onRemove={removeComp} />}
+            {tab === 'personal'   && <PersonalTab   data={cv.personal}     onChange={setPersonal} />}
+            {tab === 'experience' && <ExperienceTab items={cv.experiences} onAdd={addExp}  onUpdate={updateExp}  onRemove={removeExp}  />}
+            {tab === 'education'  && <EducationTab  items={cv.formations}  onAdd={addForm} onUpdate={updateForm} onRemove={removeForm} />}
+            {tab === 'skills'     && (
+              <SkillsTab
+                items={cv.competences}  onAdd={addComp} onUpdate={updateComp} onRemove={removeComp}
+                qualites={cv.qualites}  onAddQual={addQual}  onUpdateQual={updateQual}  onRemoveQual={removeQual}
+                langues={cv.langues}    onAddLang={addLang}  onUpdateLang={updateLang}  onRemoveLang={removeLang}
+                passions={cv.passions}  onAddPass={addPass}  onUpdatePass={updatePass}  onRemovePass={removePass}
+              />
+            )}
           </div>
         </section>
 
-        {/* Preview panel */}
         <section className="preview-panel">
           <p className="preview-label">Aperçu en temps réel</p>
           <div className="preview-sticky">

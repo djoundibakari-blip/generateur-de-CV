@@ -1,15 +1,16 @@
 const mkId = () => Math.random().toString(36).slice(2)
 
-/* ── Section headers (FR + EN) ── */
 const SECTION_RE = {
-  profile: /^(profil|profile|résumé professionnel?|professional summary|summary|about|à propos|présentation|objective)\s*:?\s*$/i,
+  profile:    /^(profil|profile|résumé professionnel?|professional summary|summary|about|à propos|présentation|objective)\s*:?\s*$/i,
   experience: /^(expériences? professionnelles?|expériences?|professional experience|work experience|parcours|emplois?|career)\s*:?\s*$/i,
-  education: /^(formations?|education|diplômes?|études|cursus|scolarité|academic)\s*:?\s*$/i,
-  skills: /^(compétences?(?:\s+(?:techniques?|clés|informatiques?))?|skills?|technologies|langages?|outils|savoir-faire)\s*:?\s*$/i,
+  education:  /^(formations?|education|diplômes?|études|cursus|scolarité|academic)\s*:?\s*$/i,
+  skills:     /^(compétences?(?:\s+(?:techniques?|clés|informatiques?))?|skills?|technologies|langages?|outils|savoir-faire)\s*:?\s*$/i,
+  qualites:   /^(qualités?(?:\s+(?:personnelles?|professionnelles?))?|soft skills?|aptitudes?|atouts?|savoir-être)\s*:?\s*$/i,
+  langues:    /^(langues?|languages?|langue vivante|linguistic)\s*:?\s*$/i,
+  passions:   /^(passions?|loisirs?|hobbies?|centres? d'intérêts?|intérêts?|activités?)\s*:?\s*$/i,
 }
 
-/* ── Date range pattern ── */
-const DATE_RANGE_RE = /(?:(?:jan\w*|fév\w*|mar\w*|avr\w*|mai|juin|juil\w*|aoû?\w*|sep\w*|oct\w*|nov\w*|déc\w*|jan\w*|feb\w*|mar\w*|apr\w*|may|jun\w*|jul\w*|aug\w*|sep\w*|oct\w*|nov\w*|dec\w*)\s+)?\d{4}\s*[-–→/àa]\s*(?:(?:jan\w*|fév\w*|mar\w*|avr\w*|mai|juin|juil\w*|aoû?\w*|sep\w*|oct\w*|nov\w*|déc\w*|jan\w*|feb\w*|mar\w*|apr\w*|may|jun\w*|jul\w*|aug\w*|sep\w*|oct\w*|nov\w*|dec\w*)\s+)?\d{4}|(?:présent|actuel|aujourd'hui|en cours|current|now)/gi
+const DATE_RANGE_RE = /(?:(?:jan\w*|fév\w*|mar\w*|avr\w*|mai|juin|juil\w*|aoû?\w*|sep\w*|oct\w*|nov\w*|déc\w*|feb\w*|apr\w*|may|jun\w*|jul\w*|aug\w*|dec\w*)\s+)?\d{4}\s*[-–→/àa]\s*(?:(?:jan\w*|fév\w*|mar\w*|avr\w*|mai|juin|juil\w*|aoû?\w*|sep\w*|oct\w*|nov\w*|déc\w*|feb\w*|apr\w*|may|jun\w*|jul\w*|aug\w*|dec\w*)\s+)?\d{4}|(?:présent|actuel|aujourd'hui|en cours|current|now)/gi
 
 const MONTH_MAP = {
   jan: '01', fév: '02', feb: '02', mar: '03', avr: '04', apr: '04',
@@ -35,14 +36,30 @@ function parseDateRange(str) {
   return { debut: toMonthInput(parts[0]), fin: toMonthInput(parts[1] || '') }
 }
 
-/* ── Contact extraction ── */
 function extractContact(text) {
   const email = text.match(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i)?.[0] || ''
   const phone = text.match(/(?:\+33\s?|0)[1-9](?:[\s.\-]?\d{2}){4}/)?.[0]?.trim() || ''
   return { email, telephone: phone }
 }
 
-/* ── Name extraction (first title-case 2–5 word line) ── */
+function extractGithub(text) {
+  const m = text.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/[\w.-]+(?:\/[\w.-]+)?/i)
+  return m ? m[0].replace(/^https?:\/\/(www\.)?/, '') : ''
+}
+
+function extractLocation(text) {
+  const lines = text.split('\n').map(l => l.trim())
+  for (const line of lines.slice(0, 20)) {
+    if (/(?:mobilité|mobile|localisation|adresse|ville|city)\s*[:–-]/i.test(line)) {
+      return line.replace(/.*?[:–-]\s*/, '').trim().slice(0, 60)
+    }
+    if (/^[A-ZÀÁÂÉÈÊÎÏÔÙÛ][a-zàáâéèêîïôùû]+(?:\s*[/|]\s*(?:MOBILITÉ|Mobilité|FRANCE|France))?$/.test(line) && line.length < 40) {
+      return line
+    }
+  }
+  return ''
+}
+
 function extractName(lines) {
   const skip = /[@http|linkedin|github|tel:|phone:|mail:|\d{5,}]/i
   const stop = /^(profil|expérience|formation|compétence|skill|education)/i
@@ -57,7 +74,6 @@ function extractName(lines) {
   return { prenom: '', nom: '' }
 }
 
-/* ── Headline: first short line after name that isn't contact info ── */
 function extractHeadline(lines, name) {
   if (!name.prenom) return ''
   const idx = lines.findIndex(l => l.includes(name.prenom))
@@ -67,10 +83,9 @@ function extractHeadline(lines, name) {
   return ''
 }
 
-/* ── Split text into named sections ── */
 function splitSections(text) {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
-  const sections = { header: [], profile: [], experience: [], education: [], skills: [] }
+  const sections = { header: [], profile: [], experience: [], education: [], skills: [], qualites: [], langues: [], passions: [] }
   let current = 'header'
   for (const line of lines) {
     let hit = false
@@ -82,11 +97,9 @@ function splitSections(text) {
   return sections
 }
 
-/* ── Parse experience / education blocks ── */
 function parseEntries(lines, isEdu = false) {
   const entries = []
   let cur = null
-
   for (const line of lines) {
     const dateMatch = line.match(DATE_RANGE_RE)
     if (dateMatch) {
@@ -97,17 +110,16 @@ function parseEntries(lines, isEdu = false) {
         ? { id: mkId(), diplome: rest, ecole: '', debut, fin, description: '' }
         : { id: mkId(), poste: rest, entreprise: '', debut, fin, description: '' }
     } else if (cur) {
-      const titleKey  = isEdu ? 'diplome' : 'poste'
-      const orgKey    = isEdu ? 'ecole'   : 'entreprise'
+      const titleKey = isEdu ? 'diplome' : 'poste'
+      const orgKey   = isEdu ? 'ecole'   : 'entreprise'
       if (!cur[titleKey] && line.length < 80) {
         cur[titleKey] = line
       } else if (!cur[orgKey] && line.length < 80) {
         cur[orgKey] = line
       } else {
-        cur.description += (cur.description ? ' ' : '') + line
+        cur.description += (cur.description ? '\n' : '') + line.replace(/^[•\-\*]\s*/, '')
       }
     } else {
-      /* no date yet — try to detect a "Poste — Entreprise" pattern */
       const sep = line.match(/^(.+?)\s*[–|—]\s*(.+)$/)
       if (sep && sep[1].length < 60 && sep[2].length < 60) {
         cur = isEdu
@@ -120,7 +132,6 @@ function parseEntries(lines, isEdu = false) {
   return entries.filter(e => isEdu ? (e.diplome || e.ecole) : (e.poste || e.entreprise))
 }
 
-/* ── Parse skills ── */
 function parseSkills(lines) {
   const raw = lines.join(' , ')
   const items = raw
@@ -134,23 +145,63 @@ function parseSkills(lines) {
     .map(nom => ({ id: mkId(), nom, niveau: '' }))
 }
 
-/* ── Main export ── */
+function parseSimpleList(lines) {
+  const raw = lines.join('\n')
+  const items = raw
+    .split(/[,;\n]/)
+    .map(s => s.replace(/^[-–*•]\s*/, '').trim())
+    .filter(s => s.length > 1 && s.length < 60)
+  const seen = new Set()
+  return items
+    .filter(s => { if (seen.has(s.toLowerCase())) return false; seen.add(s.toLowerCase()); return true })
+    .slice(0, 15)
+    .map(nom => ({ id: mkId(), nom }))
+}
+
+function parseLangues(lines) {
+  const raw = lines.join('\n')
+  const items = raw
+    .split(/[,;\n]/)
+    .map(s => s.replace(/^[-–*•]\s*/, '').trim())
+    .filter(s => s.length > 1 && s.length < 80)
+  const seen = new Set()
+  return items
+    .filter(s => {
+      const key = s.toLowerCase().split(/[\s(]/)[0]
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+    .slice(0, 6)
+    .map(raw => {
+      const m = raw.match(/^(.+?)\s*[\(\-:]\s*(.+?)\)?$/)
+      if (m) return { id: mkId(), nom: m[1].trim(), niveau: m[2].trim() }
+      return { id: mkId(), nom: raw, niveau: '' }
+    })
+}
+
 export function parseCV(text) {
   const sec = splitSections(text)
-  const contact = extractContact(text)
-  const name = extractName(sec.header.length > 0 ? sec.header : text.split('\n').map(l => l.trim()))
-  const headline = extractHeadline(text.split('\n').map(l => l.trim()), name)
-  const resume = sec.profile.join(' ').slice(0, 600)
+  const contact     = extractContact(text)
+  const name        = extractName(sec.header.length > 0 ? sec.header : text.split('\n').map(l => l.trim()))
+  const headline    = extractHeadline(text.split('\n').map(l => l.trim()), name)
+  const resume      = sec.profile.join(' ').slice(0, 600)
+  const github      = extractGithub(text)
+  const localisation = extractLocation(text)
 
   return {
     personal: {
       prenom: name.prenom, nom: name.nom,
       headline, resume,
       email: contact.email, telephone: contact.telephone,
+      localisation, github,
       photoUrl: null, photoFile: null,
     },
     experiences: parseEntries(sec.experience, false),
     formations:  parseEntries(sec.education,  true),
     competences: parseSkills(sec.skills),
+    qualites:    parseSimpleList(sec.qualites),
+    langues:     parseLangues(sec.langues),
+    passions:    parseSimpleList(sec.passions),
   }
 }
