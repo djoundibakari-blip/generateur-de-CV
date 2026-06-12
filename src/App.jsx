@@ -5,6 +5,7 @@ import ExperienceTab from './components/ExperienceTab.jsx'
 import EducationTab from './components/EducationTab.jsx'
 import SkillsTab from './components/SkillsTab.jsx'
 import CVPreview from './components/CVPreview.jsx'
+import ImportModal from './components/ImportModal.jsx'
 
 const mkId = () => crypto.randomUUID()
 
@@ -22,6 +23,13 @@ export default function App() {
   const [tab, setTab] = useState('personal')
   const [cv, setCv] = useState(INIT)
   const [exporting, setExporting] = useState(false)
+  const [importing, setImporting] = useState(false)
+
+  /* ── import handler ── */
+  const handleImport = (parsed) => {
+    setCv(parsed)
+    setTab('personal')
+  }
 
   /* ── personal ── */
   const setPersonal = (field, value) =>
@@ -103,18 +111,34 @@ export default function App() {
 
   return (
     <div className="app">
+      {/* ── Import modal ── */}
+      {importing && (
+        <ImportModal
+          onClose={() => setImporting(false)}
+          onApply={handleImport}
+        />
+      )}
+
       {/* ── Header ── */}
       <header className="app-header">
         <div className="header-brand">
           <div className="brand-icon">CV</div>
           <span className="brand-name">CV Builder</span>
         </div>
-        <button className="btn-export" onClick={exportPDF} disabled={exporting}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          {exporting ? 'Génération…' : 'Exporter PDF'}
-        </button>
+        <div className="header-actions">
+          <button className="btn-import" onClick={() => setImporting(true)}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Importer un CV
+          </button>
+          <button className="btn-export" onClick={exportPDF} disabled={exporting}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 14 12 9 7 14"/><line x1="12" y1="9" x2="12" y2="21"/>
+            </svg>
+            {exporting ? 'Génération…' : 'Exporter PDF'}
+          </button>
+        </div>
       </header>
 
       {/* ── Body ── */}
