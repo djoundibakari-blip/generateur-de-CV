@@ -1,0 +1,23 @@
+{
+  "name": "generateur-cv",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^149.0.0",
+    "mammoth": "^1.12.0",
+    "next": "^14.2.0",
+    "pdfjs-dist": "^6.0.227",
+    "puppeteer-core": "^25.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}
