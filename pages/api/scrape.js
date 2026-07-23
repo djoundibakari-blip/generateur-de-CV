@@ -1,5 +1,18 @@
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/pages/api/auth/[...nextauth]'
+import { assertAccess, AccessError, accessErrorResponse } from '@/lib/access/assertAccess'
+import { FEATURES } from '@/lib/plans'
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Méthode non autorisée' })
+
+  const session = await getServerSession(req, res, authOptions)
+  try {
+    await assertAccess(session, FEATURES.SCRAPING)
+  } catch (e) {
+    if (e instanceof AccessError) return res.status(403).json(accessErrorResponse(e))
+    throw e
+  }
 
   const { url } = req.body ?? {}
 

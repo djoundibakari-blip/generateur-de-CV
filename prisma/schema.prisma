@@ -1,0 +1,112 @@
+// Prisma schema — modèle de données pour l'auth (NextAuth) et le pricing/crédits
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")          // connexion poolée — utilisée à l'exécution (serverless)
+  directUrl = env("DATABASE_URL_UNPOOLED") // connexion directe — utilisée uniquement par les migrations
+}
+
+/* ── NextAuth (Prisma Adapter) — modèles requis tels quels ── */
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+/* ── Utilisateur ── */
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  emailVerified    DateTime?
+  name             String?
+  image            String?
+  stripeCustomerId String?  @unique
+  createdAt        DateTime @default(now())
+
+  accounts     Account[]
+  sessions     Session[]
+  subscription Subscription?
+  creditLedger CreditLedger[]
+}
+
+/* ── Catalogue des plans (4 paliers fixes) ── */
+
+model Plan {
+  id             String   @id @default(cuid())
+  key            String   @unique // FREE | STANDARD | INTERMEDIATE | PREMIUM
+  name           String
+  priceMonthly   Int      // en centimes
+  stripePriceId  String?
+  monthlyCredits Int
+  features       Json     // ex: ["ai_parse", "ai_analyze", ...]
+
+  subscriptions Subscription[]
+}
+
+/* ── Abonnement courant d'un utilisateur ── */
+
+model Subscription {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  status               String    @default("active") // active | trialing | past_due | canceled
+  stripeSubscriptionId String?   @unique
+  currentPeriodEnd     DateTime?
+
+  creditsBalance Int @default(0) // compteur "cache" — le CreditLedger fait foi
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/* ── Journal des mouvements de crédits (source de vérité / audit) ── */
+
+model CreditLedger {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String   // ai_parse | ai_analyze | ai_extract_job | ai_adapt | scraping | cover_letter | renewal | admin_adjust
+  delta     Int      // -1 pour une conso, +N pour un renouvellement/ajustement
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}

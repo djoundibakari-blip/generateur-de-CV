@@ -1,3 +1,8 @@
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/pages/api/auth/[...nextauth]'
+import { assertAccess, AccessError, accessErrorResponse } from '@/lib/access/assertAccess'
+import { ACTION_FEATURE_MAP } from '@/lib/plans'
+
 const OLLAMA       = process.env.OLLAMA_URL   || 'http://localhost:11434'
 const GROQ_API_KEY = process.env.GROQ_API_KEY || ''
 const GROQ_MODEL   = process.env.GROQ_MODEL   || 'openai/gpt-oss-120b'
@@ -117,6 +122,18 @@ export default async function handler(req, res) {
   const cv     = body.cv ?? {}
   const model  = (body.model  ?? 'mistral').trim()
   const action = (body.action ?? req.query.action ?? 'adapt').trim()
+
+  /* ── Feature gating + crédits (toutes les actions IA sont payantes) ── */
+  const requiredFeature = ACTION_FEATURE_MAP[action]
+  if (requiredFeature) {
+    const session = await getServerSession(req, res, authOptions)
+    try {
+      await assertAccess(session, requiredFeature)
+    } catch (e) {
+      if (e instanceof AccessError) return res.status(403).json(accessErrorResponse(e))
+      throw e
+    }
+  }
 
   /* ── AGENT 1 — parse : texte brut → JSON structuré ── */
   if (action === 'parse') {
