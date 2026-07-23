@@ -141,7 +141,7 @@ Règles strictes :
     const result = await callAI(model, [
       { role: 'system', content: system },
       { role: 'user',   content: `## TEXTE BRUT DU CV (peut être désordonné si PDF 2 colonnes)\n${cvText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"personal":{"prenom":"","nom":"","headline":"","email":"","telephone":"","resume":"","localisation":"","github":""},"experiences":[{"poste":"","entreprise":"","debut":"","fin":"","description":""}],"formations":[{"diplome":"","ecole":"","debut":"","fin":"","description":""}],"competences":[{"nom":"","niveau":""}],"qualites":[{"nom":""}],"langues":[{"nom":"","niveau":""}],"passions":[{"nom":""}]}` },
-    ], { numPredict: 1000, numCtx: 4096, timeout: 360, temperature: 0.1 })
+    ], { numPredict: 2500, numCtx: 4096, timeout: 360, temperature: 0.1 })
 
     if (!result) return res.status(503).json({ error: 'Ollama ne répond pas (parse).' })
     return res.json(result)
@@ -165,7 +165,7 @@ Règles strictes :
     const result = await callAI(model, [
       { role: 'system', content: system },
       { role: 'user',   content: `## OFFRE D'EMPLOI\n${offerText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"poste":"","entreprise":"","secteur":"","contrat":"","localisation":"","experience_requise":"","niveau_etudes":"","stack_obligatoire":[],"stack_souhaitee":[],"soft_skills":[],"missions_principales":[]}` },
-    ], { numPredict: 400, numCtx: 2048, timeout: 240, temperature: 0.1 })
+    ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1 })
 
     if (!result) return res.status(503).json({ error: 'Ollama ne répond pas (extract_job).' })
     return res.json(result)
@@ -179,7 +179,7 @@ Règles strictes :
     const result = await callAI(model, [
       { role: 'system', content: 'Tu es un expert RH senior et coach carrière.\nTu réponds UNIQUEMENT avec du JSON valide, sans markdown, sans texte avant ou après.' },
       { role: 'user',   content: `## CV À ANALYSER (JSON)\n${cvJson}\n\n## MISSION\n1. Score de qualité global (0–100) : clarté, exhaustivité, impact des descriptions, cohérence.\n2. 3 à 5 points forts (ce qui est bien fait).\n3. 3 à 5 points faibles ou axes d'amélioration concrets.\n4. 3 à 5 suggestions d'amélioration actionnables et précises.\n5. Sections importantes manquantes ou trop courtes.\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":68,"points_forts":[],"points_faibles":[],"suggestions":[],"sections_manquantes":[]}` },
-    ], { numPredict: 512, numCtx: 3072, timeout: 300, temperature: 0.3 })
+    ], { numPredict: 1500, numCtx: 3072, timeout: 300, temperature: 0.3 })
 
     if (!result) return res.status(503).json({ error: 'Ollama ne répond pas (analyze).' })
     return res.json(result)
@@ -200,7 +200,7 @@ Règles strictes :
       jobRequirements = await callAI(model, [
         { role: 'system', content: 'Tu es un recruteur expert. JSON uniquement, sans markdown.' },
         { role: 'user',   content: `## OFFRE\n${offerText}\n\n## FORMAT JSON\n{"poste":"","stack_obligatoire":[],"stack_souhaitee":[],"soft_skills":[],"experience_requise":"","niveau_etudes":"","missions_principales":[]}` },
-      ], { numPredict: 350, numCtx: 2048, timeout: 240, temperature: 0.1 })
+      ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1 })
 
       if (!jobRequirements) {
         return res.status(503).json({ error: 'Échec extraction offre (Agent 2 fallback).' })
@@ -225,7 +225,7 @@ RÈGLES ABSOLUES — HALLUCINATION INTERDITE :
     const result = await callAI(model, [
       { role: 'system', content: system },
       { role: 'user',   content: `## EXIGENCES DU POSTE (JSON — extrait par Agent 2)\n${exigencesJson}\n\n## CV DU CANDIDAT (JSON)\n${cvJson}\n\n## MISSION\n1. Réécris personal.resume : mets en avant les points qui matchent l'offre (max 500 car.).\n2. Adapte personal.headline au poste si pertinent, sinon conserve-le.\n3. Pour chaque expérience : reformule description avec les mots-clés du poste (garde les faits).\n4. Réordonne competences : stack_obligatoire en premier, puis stack_souhaitee, puis reste.\n5. Score de correspondance (0–100) honnête.\n6. Compétences du poste absentes du CV → missing_skills (max 8).\n7. Pour chaque item de stack_obligatoire, stack_souhaitee, soft_skills, experience_requise :\n   indique si couvert par le CV avec une courte explication.\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":72,"missing_skills":[],"headline":"","resume":"","experiences":[{"id":"ID_EXACT_DU_CV","description":""}],"competences":[{"id":"ID_EXACT_DU_CV","nom":"","niveau":""}],"comparaison":[{"exigence":"","present":true,"detail":""}]}` },
-    ], { numPredict: 900, numCtx: 4096, timeout: 540, temperature: 0.2 })
+    ], { numPredict: 2500, numCtx: 4096, timeout: 540, temperature: 0.2 })
 
     if (!result) return res.status(500).json({ error: 'Agent 3 (adapt) : JSON invalide ou timeout.' })
     return res.json(result)
