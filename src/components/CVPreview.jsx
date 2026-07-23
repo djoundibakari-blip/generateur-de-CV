@@ -71,18 +71,19 @@ function Desc({ text }) {
    CVPreview
 ══════════════════════════════════════════════════════ */
 export default function CVPreview({ cv }) {
-  const { personal, experiences, formations, competences, qualites = [], langues = [], passions = [] } = cv
+  const { personal, experiences, projets = [], formations, competences, qualites = [], langues = [], passions = [] } = cv
   const fullName = [personal.prenom, personal.nom].filter(Boolean).join(' ').toUpperCase()
   const initials  = [personal.prenom?.[0], personal.nom?.[0]].filter(Boolean).join('').toUpperCase()
 
   const exps  = experiences.filter(e => e.poste || e.entreprise)
+  const projs = projets.filter(p => p.nom)
   const forms = formations.filter(f => f.diplome || f.ecole)
   const comps = competences.filter(c => c.nom)
   const quals = qualites.filter(q => q.nom)
   const langs = langues.filter(l => l.nom)
   const passs = passions.filter(p => p.nom)
 
-  const isEmpty = !fullName && !personal.resume && !exps.length && !forms.length && !comps.length
+  const isEmpty = !fullName && !personal.resume && !exps.length && !projs.length && !forms.length && !comps.length
 
   if (isEmpty) {
     return (
@@ -195,6 +196,24 @@ export default function CVPreview({ cv }) {
                         <div className="cv-entry-title">{e.poste || e.entreprise}</div>
                         {meta && <div className="cv-entry-meta">{meta}</div>}
                         <Desc text={e.description} />
+                      </div>
+                    )
+                  })}
+                </div>
+              </MainSection>
+            )}
+
+            {/* Projets */}
+            {projs.length > 0 && (
+              <MainSection title="Projets">
+                <div className="cv-entries">
+                  {projs.map(p => {
+                    const meta = [p.technologies, p.lien].filter(Boolean).join(' • ')
+                    return (
+                      <div key={p.id} className="cv-entry">
+                        <div className="cv-entry-title">{p.nom}</div>
+                        {meta && <div className="cv-entry-meta">{meta}</div>}
+                        <Desc text={p.description} />
                       </div>
                     )
                   })}

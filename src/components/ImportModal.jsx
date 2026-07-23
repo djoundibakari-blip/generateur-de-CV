@@ -83,6 +83,9 @@ export default function ImportModal({ onClose, onApply }) {
         experiences: (data.experiences || []).map(e => ({
           id: mkId(), poste: '', entreprise: '', debut: '', fin: '', description: '', ...e,
         })),
+        projets: (data.projets || []).map(pr => ({
+          id: mkId(), nom: '', technologies: '', lien: '', description: '', ...pr,
+        })),
         formations: (data.formations || []).map(f => ({
           id: mkId(), diplome: '', ecole: '', debut: '', fin: '', description: '', ...f,
         })),

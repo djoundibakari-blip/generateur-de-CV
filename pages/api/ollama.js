@@ -81,6 +81,8 @@ function slimCV(cv) {
     personal,
     experiences: (cv.experiences ?? []).map(({ id, poste, entreprise, debut, fin, description }) =>
       ({ id, poste, entreprise, debut, fin, description })),
+    projets: (cv.projets ?? []).map(({ id, nom, technologies, lien, description }) =>
+      ({ id, nom, technologies, lien, description })),
     competences: (cv.competences ?? []).map(({ id, nom, niveau }) => ({ id, nom, niveau })),
     formations:  (cv.formations  ?? []).map(({ id, diplome, ecole, debut, fin }) =>
       ({ id, diplome, ecole, debut, fin })),
@@ -136,11 +138,12 @@ Règles strictes :
 - Compétences : liste TOUS les outils, langages, frameworks mentionnés
 - Si une ligne contient plusieurs compétences séparées par des virgules ou des tirets, crée une entrée par compétence
 - Qualités : extrais les soft skills et qualités personnelles
-- Passions/hobbies : liste les centres d'intérêt`
+- Passions/hobbies : liste les centres d'intérêt
+- Projets : distingue les projets personnels/scolaires/associatifs (souvent regroupés sous "Projets", "Réalisations", ou listés en sous-puces d'une expérience type "formation") des expériences professionnelles classiques ; un projet a un nom, une description et éventuellement des technologies utilisées`
 
     const result = await callAI(model, [
       { role: 'system', content: system },
-      { role: 'user',   content: `## TEXTE BRUT DU CV (peut être désordonné si PDF 2 colonnes)\n${cvText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"personal":{"prenom":"","nom":"","headline":"","email":"","telephone":"","resume":"","localisation":"","github":""},"experiences":[{"poste":"","entreprise":"","debut":"","fin":"","description":""}],"formations":[{"diplome":"","ecole":"","debut":"","fin":"","description":""}],"competences":[{"nom":"","niveau":""}],"qualites":[{"nom":""}],"langues":[{"nom":"","niveau":""}],"passions":[{"nom":""}]}` },
+      { role: 'user',   content: `## TEXTE BRUT DU CV (peut être désordonné si PDF 2 colonnes)\n${cvText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"personal":{"prenom":"","nom":"","headline":"","email":"","telephone":"","resume":"","localisation":"","github":""},"experiences":[{"poste":"","entreprise":"","debut":"","fin":"","description":""}],"projets":[{"nom":"","technologies":"","lien":"","description":""}],"formations":[{"diplome":"","ecole":"","debut":"","fin":"","description":""}],"competences":[{"nom":"","niveau":""}],"qualites":[{"nom":""}],"langues":[{"nom":"","niveau":""}],"passions":[{"nom":""}]}` },
     ], { numPredict: 2500, numCtx: 4096, timeout: 360, temperature: 0.1 })
 
     if (!result) return res.status(503).json({ error: 'Ollama ne répond pas (parse).' })

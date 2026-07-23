@@ -3,6 +3,7 @@ import LandingPage from './components/LandingPage.jsx'
 import TabNav from './components/TabNav.jsx'
 import PersonalTab from './components/PersonalTab.jsx'
 import ExperienceTab from './components/ExperienceTab.jsx'
+import ProjectsTab from './components/ProjectsTab.jsx'
 import EducationTab from './components/EducationTab.jsx'
 import SkillsTab from './components/SkillsTab.jsx'
 import CVPreview from './components/CVPreview.jsx'
@@ -17,7 +18,46 @@ const INIT = {
     telephone: '', resume: '', localisation: '', github: '',
     photoUrl: null, photoFile: null,
   },
-  experiences: [],
+  experiences: [
+    {
+      id: mkId(),
+      poste: 'Projets Webacadémie',
+      entreprise: 'Epitech Lyon',
+      debut: '2025-09',
+      fin: '',
+      description: `Réalisation de plusieurs projets full-stack en équipe et en autonomie dans le cadre de la formation Epitech (voir section Projets).`,
+    },
+  ],
+  projets: [
+    {
+      id: mkId(),
+      nom: 'Projet ESN',
+      technologies: 'Java, Docker, Tailwind',
+      lien: '',
+      description: "Réseau interne à une entreprise avec fil d'actualité, page de connexion et création de compte.",
+    },
+    {
+      id: mkId(),
+      nom: 'My Cinema',
+      technologies: 'PHP, MySQL, Tailwind',
+      lien: '',
+      description: 'Interface de home cinema avec catalogue, horaires et réservations.',
+    },
+    {
+      id: mkId(),
+      nom: 'Générateur de CV',
+      technologies: 'HTML, JavaScript, Bootstrap, PHP',
+      lien: '',
+      description: 'Site permettant de générer un CV en saisissant uniquement ses informations personnelles.',
+    },
+    {
+      id: mkId(),
+      nom: 'Corelab',
+      technologies: 'MongoDB, TypeScript, React',
+      lien: '',
+      description: "Plateforme de notation d'élèves avec quiz, leçons et suivi intégré.",
+    },
+  ],
   formations: [],
   competences: [],
   qualites: [],
@@ -86,6 +126,12 @@ export default function App() {
   const addExp    = () => addItem('experiences', expTpl)
   const updateExp = (id, f, v) => updateItem('experiences', id, f, v)
   const removeExp = id => removeItem('experiences', id)
+
+  /* projets */
+  const projetTpl = { nom: '', technologies: '', lien: '', description: '' }
+  const addProjet    = () => addItem('projets', projetTpl)
+  const updateProjet = (id, f, v) => updateItem('projets', id, f, v)
+  const removeProjet = id => removeItem('projets', id)
 
   /* formations */
   const formTpl = { diplome: '', ecole: '', debut: '', fin: '', description: '' }
@@ -194,7 +240,8 @@ export default function App() {
           <TabNav active={tab} onChange={setTab} cv={cv} />
           <div className="tab-body">
             {tab === 'personal'   && <PersonalTab   data={cv.personal}     onChange={setPersonal} />}
-            {tab === 'experience' && <ExperienceTab items={cv.experiences} onAdd={addExp}  onUpdate={updateExp}  onRemove={removeExp}  onReorder={(f,t) => reorderItem('experiences', f, t)} />}
+            {tab === 'experience' && <ExperienceTab items={cv.experiences} onAdd={addExp}    onUpdate={updateExp}    onRemove={removeExp}    onReorder={(f,t) => reorderItem('experiences', f, t)} />}
+            {tab === 'projects'   && <ProjectsTab    items={cv.projets}     onAdd={addProjet} onUpdate={updateProjet} onRemove={removeProjet} onReorder={(f,t) => reorderItem('projets',     f, t)} />}
             {tab === 'education'  && <EducationTab  items={cv.formations}  onAdd={addForm} onUpdate={updateForm} onRemove={removeForm} onReorder={(f,t) => reorderItem('formations',  f, t)} />}
             {tab === 'skills'     && (
               <SkillsTab
