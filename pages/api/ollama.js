@@ -139,7 +139,8 @@ Règles strictes :
 - Si une ligne contient plusieurs compétences séparées par des virgules ou des tirets, crée une entrée par compétence
 - Qualités : extrais les soft skills et qualités personnelles
 - Passions/hobbies : liste les centres d'intérêt
-- Projets : distingue les projets personnels/scolaires/associatifs (souvent regroupés sous "Projets", "Réalisations", ou listés en sous-puces d'une expérience type "formation") des expériences professionnelles classiques ; un projet a un nom, une description et éventuellement des technologies utilisées`
+- Projets : repère les projets techniques (souvent une liste du type "Projet X : description (technologies)" sous un intitulé "Projets"/"Réalisations", ou en sous-puces d'une entrée de formation/alternance) et extrais CHACUN comme une entrée distincte du tableau "projets" — jamais dans "experiences" — avec : nom (ex. "Projet ESN"), technologies (les outils/langages cités, souvent entre parenthèses ou après une virgule en fin de ligne), lien (URL GitHub/démo si présente), description (le reste du texte, sans le nom ni la liste de technologies)
+- Ne mélange jamais un projet avec une expérience professionnelle rémunérée : si le texte source ne donne ni employeur ni contrat, c'est un projet, pas une expérience`
 
     const result = await callAI(model, [
       { role: 'system', content: system },
