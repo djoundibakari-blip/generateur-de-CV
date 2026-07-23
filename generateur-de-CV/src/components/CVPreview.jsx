@@ -1,37 +1,22 @@
 /* ── Icons ────────────────────────────────────────────── */
 const PhoneIcon = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.07 1.18 2 2 0 012 .9h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91A16 16 0 0015.1 17.9l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
   </svg>
 )
 const MailIcon = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
   </svg>
 )
 const PinIcon = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
   </svg>
 )
 const LinkIcon = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
-  </svg>
-)
-const UserIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-  </svg>
-)
-const BriefcaseIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M20 7h-4V5c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm-8-2h4v2h-4V5zm8 14H4V9h16v10z"/>
-  </svg>
-)
-const GradIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zm0 12.08L5.08 11 12 7.19 18.92 11 12 15.08zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
   </svg>
 )
 
@@ -39,18 +24,17 @@ const GradIcon = () => (
 function fmtDate(raw) {
   if (!raw) return ''
   const lower = raw.toLowerCase().trim()
-  if (['présent', 'present', 'en cours', 'actuel', 'aujourd\'hui'].includes(lower)) return 'En cours'
+  if (['présent', 'present', 'en cours', 'actuel', "aujourd'hui"].includes(lower)) return 'En cours'
   const [y, m] = raw.split('-')
   const months = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc']
   return m ? `${months[parseInt(m) - 1]} ${y}` : y
 }
 
-function DateRange({ debut, fin }) {
+function fmtRange(debut, fin) {
   const s = fmtDate(debut)
-  const e = fin ? fmtDate(fin) : ''
-  if (!s && !e) return null
-  const label = s && e ? `${s} – ${e}` : s || e
-  return <span className="cv-date">{label}</span>
+  const e = fin ? fmtDate(fin) : 'En cours'
+  if (!s) return e
+  return `${s} → ${e}`
 }
 
 function SideSection({ title, children }) {
@@ -62,20 +46,16 @@ function SideSection({ title, children }) {
   )
 }
 
-function MainSection({ icon, title, children }) {
+function MainSection({ title, children }) {
   return (
     <section className="cv-main-section">
-      <div className="cv-main-heading">
-        <span className="cv-heading-icon">{icon}</span>
-        <span>{title}</span>
-      </div>
+      <div className="cv-main-heading">{title}</div>
       <div className="cv-main-rule" />
       {children}
     </section>
   )
 }
 
-/* ── Render description with bullet points ────────────── */
 function Desc({ text }) {
   if (!text) return null
   const lines = text.split('\n').map(l => l.replace(/^[•\-\*]\s*/, '').trim()).filter(Boolean)
@@ -119,7 +99,7 @@ export default function CVPreview({ cv }) {
     <div className="cv-paper">
       <div className="cv-body">
 
-        {/* ══ SIDEBAR GAUCHE ══ */}
+        {/* ══ SIDEBAR ══ */}
         <aside className="cv-sidebar">
 
           {/* Logo */}
@@ -134,6 +114,14 @@ export default function CVPreview({ cv }) {
               : <span>{initials || '?'}</span>}
           </div>
 
+          {/* Nom + Titre dans la sidebar */}
+          <div className="cv-sb-identity">
+            <div className="cv-name">{fullName || 'VOTRE NOM'}</div>
+            {personal.headline && (
+              <div className="cv-title">{personal.headline}</div>
+            )}
+          </div>
+
           {/* Contact */}
           {(personal.telephone || personal.email || personal.localisation || personal.github) && (
             <SideSection title="Contact">
@@ -144,12 +132,14 @@ export default function CVPreview({ cv }) {
             </SideSection>
           )}
 
-          {/* Compétences */}
+          {/* Compétences — affichées en chips */}
           {comps.length > 0 && (
             <SideSection title="Compétences">
-              {comps.map(c => (
-                <div key={c.id} className="cv-sb-bullet">• {c.nom}</div>
-              ))}
+              <div className="cv-chips">
+                {comps.map(c => (
+                  <span key={c.id} className="cv-chip">{c.nom}</span>
+                ))}
+              </div>
             </SideSection>
           )}
 
@@ -177,76 +167,66 @@ export default function CVPreview({ cv }) {
               {passs.map(p => <div key={p.id} className="cv-sb-bullet">• {p.nom}</div>)}
             </SideSection>
           )}
+
         </aside>
 
-        {/* ══ COLONNE DROITE ══ */}
+        {/* ══ MAIN ══ */}
         <main className="cv-main">
-
-          {/* Bandeau sombre : Nom + Titre */}
-          <div className="cv-name-header">
-            <div className="cv-name">{fullName || 'VOTRE NOM'}</div>
-            {personal.headline && (
-              <div className="cv-title">{personal.headline.toUpperCase()}</div>
-            )}
-          </div>
-
-          {/* Corps blanc */}
           <div className="cv-sections">
 
             {/* Profil */}
             {personal.resume && (
-              <MainSection icon={<UserIcon />} title="Profil">
+              <MainSection title="Profil">
                 <p className="cv-profile-text">{personal.resume}</p>
               </MainSection>
             )}
 
-            {/* Expérience Professionnelle */}
+            {/* Expériences */}
             {exps.length > 0 && (
-              <MainSection icon={<BriefcaseIcon />} title="Expérience Professionnelle">
-                <div className="cv-timeline">
-                  {exps.map(e => (
-                    <div key={e.id} className="cv-tl-item">
-                      <div className="cv-tl-dot" />
-                      <div className="cv-tl-content">
-                        <div className="cv-entry-head">
-                          <strong className="cv-entry-title">
-                            {e.poste}{e.entreprise ? ` — ${e.entreprise}` : ''}
-                          </strong>
-                          <DateRange debut={e.debut} fin={e.fin} />
-                        </div>
+              <MainSection title="Expériences">
+                <div className="cv-entries">
+                  {exps.map(e => {
+                    const meta = [
+                      e.entreprise,
+                      (e.debut || e.fin) ? fmtRange(e.debut, e.fin) : null
+                    ].filter(Boolean).join(' • ')
+                    return (
+                      <div key={e.id} className="cv-entry">
+                        <div className="cv-entry-title">{e.poste || e.entreprise}</div>
+                        {meta && <div className="cv-entry-meta">{meta}</div>}
                         <Desc text={e.description} />
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </MainSection>
             )}
 
             {/* Formation */}
             {forms.length > 0 && (
-              <MainSection icon={<GradIcon />} title="Formation">
-                <div className="cv-timeline">
-                  {forms.map(f => (
-                    <div key={f.id} className="cv-tl-item">
-                      <div className="cv-tl-dot" />
-                      <div className="cv-tl-content">
-                        <div className="cv-entry-head">
-                          <strong className="cv-entry-title">
-                            {f.diplome || f.ecole}
-                            {f.diplome && f.ecole ? <><br /><span className="cv-entry-school">{f.ecole}</span></> : ''}
-                          </strong>
-                          <DateRange debut={f.debut} fin={f.fin} />
-                        </div>
+              <MainSection title="Formation">
+                <div className="cv-entries">
+                  {forms.map(f => {
+                    const title = f.diplome || f.ecole
+                    const meta = [
+                      f.diplome && f.ecole ? f.ecole : null,
+                      (f.debut || f.fin) ? fmtRange(f.debut, f.fin) : null
+                    ].filter(Boolean).join(' • ')
+                    return (
+                      <div key={f.id} className="cv-entry">
+                        <div className="cv-entry-title">{title}</div>
+                        {meta && <div className="cv-entry-meta">{meta}</div>}
                         <Desc text={f.description} />
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </MainSection>
             )}
 
           </div>
         </main>
+
       </div>
     </div>
   )
