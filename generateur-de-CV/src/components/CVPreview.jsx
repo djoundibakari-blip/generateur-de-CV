@@ -122,6 +122,11 @@ export default function CVPreview({ cv }) {
         {/* ══ SIDEBAR GAUCHE ══ */}
         <aside className="cv-sidebar">
 
+          {/* Logo */}
+          <div className="cv-logo">
+            <span className="cv-logo-brace">{'{'}</span>EPITECH<span className="cv-logo-brace">{'}'}</span>
+          </div>
+
           {/* Photo */}
           <div className="cv-avatar">
             {personal.photoUrl
@@ -177,66 +182,70 @@ export default function CVPreview({ cv }) {
         {/* ══ COLONNE DROITE ══ */}
         <main className="cv-main">
 
-          {/* Nom + Titre */}
-          <div className="cv-name-block">
+          {/* Bandeau sombre : Nom + Titre */}
+          <div className="cv-name-header">
             <div className="cv-name">{fullName || 'VOTRE NOM'}</div>
             {personal.headline && (
               <div className="cv-title">{personal.headline.toUpperCase()}</div>
             )}
           </div>
 
-          {/* Profil */}
-          {personal.resume && (
-            <MainSection icon={<UserIcon />} title="Profil">
-              <p className="cv-profile-text">{personal.resume}</p>
-            </MainSection>
-          )}
+          {/* Corps blanc */}
+          <div className="cv-sections">
 
-          {/* Expérience Professionnelle */}
-          {exps.length > 0 && (
-            <MainSection icon={<BriefcaseIcon />} title="Expérience Professionnelle">
-              <div className="cv-timeline">
-                {exps.map(e => (
-                  <div key={e.id} className="cv-tl-item">
-                    <div className="cv-tl-dot" />
-                    <div className="cv-tl-content">
-                      <div className="cv-entry-head">
-                        <strong className="cv-entry-title">
-                          {e.poste}{e.entreprise ? ` — ${e.entreprise}` : ''}
-                        </strong>
-                        <DateRange debut={e.debut} fin={e.fin} />
+            {/* Profil */}
+            {personal.resume && (
+              <MainSection icon={<UserIcon />} title="Profil">
+                <p className="cv-profile-text">{personal.resume}</p>
+              </MainSection>
+            )}
+
+            {/* Expérience Professionnelle */}
+            {exps.length > 0 && (
+              <MainSection icon={<BriefcaseIcon />} title="Expérience Professionnelle">
+                <div className="cv-timeline">
+                  {exps.map(e => (
+                    <div key={e.id} className="cv-tl-item">
+                      <div className="cv-tl-dot" />
+                      <div className="cv-tl-content">
+                        <div className="cv-entry-head">
+                          <strong className="cv-entry-title">
+                            {e.poste}{e.entreprise ? ` — ${e.entreprise}` : ''}
+                          </strong>
+                          <DateRange debut={e.debut} fin={e.fin} />
+                        </div>
+                        <Desc text={e.description} />
                       </div>
-                      <Desc text={e.description} />
                     </div>
-                  </div>
-                ))}
-              </div>
-            </MainSection>
-          )}
+                  ))}
+                </div>
+              </MainSection>
+            )}
 
-          {/* Formation */}
-          {forms.length > 0 && (
-            <MainSection icon={<GradIcon />} title="Formation">
-              <div className="cv-timeline">
-                {forms.map(f => (
-                  <div key={f.id} className="cv-tl-item">
-                    <div className="cv-tl-dot" />
-                    <div className="cv-tl-content">
-                      <div className="cv-entry-head">
-                        <strong className="cv-entry-title">
-                          {f.diplome || f.ecole}
-                          {f.diplome && f.ecole ? <><br /><span className="cv-entry-school">{f.ecole}</span></> : ''}
-                        </strong>
-                        <DateRange debut={f.debut} fin={f.fin} />
+            {/* Formation */}
+            {forms.length > 0 && (
+              <MainSection icon={<GradIcon />} title="Formation">
+                <div className="cv-timeline">
+                  {forms.map(f => (
+                    <div key={f.id} className="cv-tl-item">
+                      <div className="cv-tl-dot" />
+                      <div className="cv-tl-content">
+                        <div className="cv-entry-head">
+                          <strong className="cv-entry-title">
+                            {f.diplome || f.ecole}
+                            {f.diplome && f.ecole ? <><br /><span className="cv-entry-school">{f.ecole}</span></> : ''}
+                          </strong>
+                          <DateRange debut={f.debut} fin={f.fin} />
+                        </div>
+                        <Desc text={f.description} />
                       </div>
-                      <Desc text={f.description} />
                     </div>
-                  </div>
-                ))}
-              </div>
-            </MainSection>
-          )}
+                  ))}
+                </div>
+              </MainSection>
+            )}
 
+          </div>
         </main>
       </div>
     </div>

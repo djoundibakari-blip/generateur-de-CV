@@ -134,8 +134,10 @@ export function generateCVHtml(cv) {
               ${!last ? '<div class="tl-line"></div>' : ''}
             </div>
             <div class="tl-content">
-              <div class="entry-title">${title}</div>
-              ${date ? `<div class="entry-meta">${date}</div>` : ''}
+              <div class="entry-head">
+                <div class="entry-title">${title}</div>
+                ${date ? `<div class="entry-date">${date}</div>` : ''}
+              </div>
               ${renderDesc(e.description ?? '')}
             </div>
           </div>`
@@ -165,8 +167,10 @@ export function generateCVHtml(cv) {
               ${!last ? '<div class="tl-line"></div>' : ''}
             </div>
             <div class="tl-content">
-              <div class="entry-title">${title}</div>
-              ${date ? `<div class="entry-meta">${date}</div>` : ''}
+              <div class="entry-head">
+                <div class="entry-title">${title}</div>
+                ${date ? `<div class="entry-date">${date}</div>` : ''}
+              </div>
               ${renderDesc(f.description ?? '')}
             </div>
           </div>`
@@ -335,7 +339,7 @@ body {
 }
 .sec-rule {
   height: 1px;
-  background: #DDE2EC;
+  background: #1B2744;
   margin-bottom: 11px;
 }
 
@@ -381,19 +385,26 @@ body {
   padding-bottom: 12px;
 }
 
+.entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 3px;
+}
 .entry-title {
   font-size: 9.5px;
   font-weight: 700;
   color: #1B2744;
-  margin-bottom: 2px;
   line-height: 1.3;
+  flex: 1;
 }
-.entry-meta {
+.entry-date {
   font-size: 8px;
-  color: #6B7280;
-  margin-bottom: 4px;
-  line-height: 1.4;
-  font-style: italic;
+  color: #4BAFC8;
+  white-space: nowrap;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 .entry-desc {
   font-size: 8.5px;
