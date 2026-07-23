@@ -644,6 +644,8 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   min-height: 780px;
+  max-width: 620px;
+  margin: 0 auto;
   font-family: 'Inter', Arial, sans-serif;
 }
 
@@ -682,38 +684,38 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 /* Nom + Titre dans la sidebar */
 .cv-sb-identity { text-align: center; }
 .cv-name {
-  font-size: 14px; font-weight: 800;
+  font-size: 17px; font-weight: 800;
   text-transform: uppercase; letter-spacing: 1.5px;
   color: #ffffff; line-height: 1.2; margin-bottom: 5px;
 }
 .cv-title {
-  font-size: 9px; color: rgba(255,255,255,.75);
+  font-size: 11px; color: rgba(255,255,255,.75);
   font-weight: 400; line-height: 1.45;
 }
 
 /* Sidebar sections */
 .cv-sb-section { display: flex; flex-direction: column; gap: 0; }
 .cv-sb-title {
-  font-size: 8.5px; text-transform: uppercase; letter-spacing: 1.6px;
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.6px;
   font-weight: 800; color: rgba(255,255,255,.55);
   margin-bottom: 7px; padding-bottom: 5px;
   border-bottom: 1px solid rgba(255,255,255,.2);
 }
 .cv-sb-item {
   display: flex; align-items: flex-start; gap: 6px;
-  font-size: 9px; color: rgba(255,255,255,.85);
+  font-size: 11px; color: rgba(255,255,255,.85);
   margin-bottom: 5px; line-height: 1.5; word-break: break-word;
 }
 .cv-sb-item svg { flex-shrink: 0; margin-top: 2px; opacity: .7; }
 .cv-sb-bullet {
-  font-size: 9px; color: rgba(255,255,255,.85);
+  font-size: 11px; color: rgba(255,255,255,.85);
   margin-bottom: 4px; line-height: 1.45;
 }
 
 /* Chips compétences */
 .cv-chips { display: flex; flex-wrap: wrap; gap: 5px; }
 .cv-chip {
-  font-size: 8px; font-weight: 600;
+  font-size: 10px; font-weight: 600;
   color: white; background: rgba(255,255,255,.18);
   border: 1px solid rgba(255,255,255,.35);
   border-radius: 20px; padding: 2px 8px;
@@ -735,7 +737,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 .cv-main-section { display: flex; flex-direction: column; }
 
 .cv-main-heading {
-  font-size: 11px; font-weight: 800; text-transform: uppercase;
+  font-size: 13px; font-weight: 800; text-transform: uppercase;
   letter-spacing: 1.8px; color: #2060D8;
   margin-bottom: 5px;
 }
@@ -745,7 +747,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 }
 
 .cv-profile-text {
-  font-size: 9.5px; line-height: 1.75; color: #374151;
+  font-size: 12px; line-height: 1.75; color: #374151;
   text-align: justify;
 }
 
@@ -755,19 +757,19 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 .cv-entry { display: flex; flex-direction: column; }
 
 .cv-entry-title {
-  font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.3;
+  font-size: 13px; font-weight: 700; color: #111827; line-height: 1.3;
   margin-bottom: 2px;
 }
 .cv-entry-meta {
-  font-size: 9px; color: #2060D8; font-weight: 600;
+  font-size: 11px; color: #2060D8; font-weight: 600;
   margin-bottom: 4px; line-height: 1.4;
 }
 .cv-entry-desc {
-  font-size: 9px; color: #4B5563; line-height: 1.7; margin-top: 2px;
+  font-size: 11px; color: #4B5563; line-height: 1.7; margin-top: 2px;
 }
 .cv-entry-list {
   margin-top: 3px; padding-left: 13px;
-  font-size: 9px; color: #4B5563; line-height: 1.65;
+  font-size: 11px; color: #4B5563; line-height: 1.65;
 }
 .cv-entry-list li { margin-bottom: 1px; }
 
@@ -778,7 +780,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   color: #9CA3AF; text-align: center; gap: 10px;
 }
 .cv-placeholder-icon { font-size: 52px; }
-.cv-placeholder-text { font-size: 13px; max-width: 200px; line-height: 1.5; }
+.cv-placeholder-text { font-size: 15px; max-width: 220px; line-height: 1.5; }
 
 /* ─── Responsive ─────────────────────────────────────────────────────── */
 @media (max-width: 1100px) {

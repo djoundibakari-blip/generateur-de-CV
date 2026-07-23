@@ -1,6 +1,6 @@
 const OLLAMA       = process.env.OLLAMA_URL   || 'http://localhost:11434'
 const GROQ_API_KEY = process.env.GROQ_API_KEY || ''
-const GROQ_MODEL   = process.env.GROQ_MODEL   || 'llama-3.3-70b-versatile'
+const GROQ_MODEL   = process.env.GROQ_MODEL   || 'openai/gpt-oss-120b'
 
 function extractJSON(content) {
   content = content.replace(/^```(?:json)?\s*/gm, '').replace(/\s*```$/gm, '')
@@ -23,6 +23,11 @@ async function groqChat(messages, { numPredict, temperature = 0.15 }) {
         messages,
         max_tokens:  numPredict,
         temperature,
+        /* gpt-oss est un modèle "reasoning" : sans ça, son raisonnement interne
+           peut fuiter dans le contenu et casser l'extraction JSON. */
+        ...(GROQ_MODEL.startsWith('openai/gpt-oss')
+          ? { reasoning_effort: 'low', include_reasoning: false }
+          : {}),
       }),
       signal: AbortSignal.timeout(120000),
     })
