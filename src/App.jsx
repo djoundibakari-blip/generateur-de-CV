@@ -9,6 +9,7 @@ import SkillsTab from './components/SkillsTab.jsx'
 import CVPreview from './components/CVPreview.jsx'
 import ImportModal from './components/ImportModal.jsx'
 import AdaptModal from './components/AdaptModal.jsx'
+import AccountMenu from './components/AccountMenu.jsx'
 
 const mkId = () => crypto.randomUUID()
 
@@ -194,6 +195,7 @@ export default function App() {
             </svg>
             {exporting ? 'Génération…' : 'Exporter PDF'}
           </button>
+          <AccountMenu />
         </div>
       </header>
 

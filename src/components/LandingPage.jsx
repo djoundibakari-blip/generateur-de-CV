@@ -1,3 +1,6 @@
+import AccountMenu from './AccountMenu.jsx'
+import PricingSection from './PricingSection.jsx'
+
 export default function LandingPage({ onStart }) {
   return (
     <div className="lp">
@@ -11,6 +14,8 @@ export default function LandingPage({ onStart }) {
         <ul className="lp-nav-links">
           <li><a href="#fonctionnement">Fonctionnement</a></li>
           <li><a href="#features">Fonctionnalités</a></li>
+          <li><a href="#tarifs">Tarifs</a></li>
+          <li><AccountMenu /></li>
           <li>
             <button className="lp-nav-cta" onClick={onStart}>Commencer</button>
           </li>
@@ -30,8 +35,8 @@ export default function LandingPage({ onStart }) {
             <span className="lp-title-line lp-title-accent">Réinventé.</span>
           </h1>
           <p className="lp-hero-desc">
-            Importez votre CV, adaptez-le à une offre d'emploi grâce à l'IA locale Ollama,
-            et obtenez un CV élégant prêt à envoyer en quelques secondes.
+            Créez votre CV gratuitement, ou laissez l'IA l'adapter à une offre d'emploi
+            et générer votre lettre de motivation en quelques secondes.
           </p>
           <div className="lp-hero-actions">
             <button className="lp-btn-primary" onClick={onStart}>
@@ -49,7 +54,7 @@ export default function LandingPage({ onStart }) {
             <div className="lp-stat-sep" />
             <div className="lp-stat"><span className="lp-stat-num">OCR</span><span className="lp-stat-label">Lecture automatique</span></div>
             <div className="lp-stat-sep" />
-            <div className="lp-stat"><span className="lp-stat-num">100%</span><span className="lp-stat-label">Gratuit & local</span></div>
+            <div className="lp-stat"><span className="lp-stat-num">4</span><span className="lp-stat-label">Offres, du gratuit au premium</span></div>
           </div>
         </div>
 
@@ -153,11 +158,11 @@ export default function LandingPage({ onStart }) {
             {[
               { icon: '🤖', title: 'Extraction intelligente', desc: 'Parser regex + OCR Tesseract pour lire PDF, Word, images et texte brut.' },
               { icon: '🎨', title: 'Template élégant', desc: 'Design professionnel dark navy avec palette Moon — sidebar, header, sections colorées.' },
-              { icon: '📥', title: 'Export PDF fidèle', desc: 'Génération serveur via Dompdf pour une mise en page parfaite, pixel perfect.' },
+              { icon: '📥', title: 'Export PDF fidèle', desc: 'Génération serveur pour une mise en page parfaite, pixel perfect.' },
               { icon: '⚡', title: 'Aperçu temps réel', desc: 'Chaque frappe met à jour le CV instantanément — pas besoin de recharger.' },
               { icon: '🌍', title: 'Multilingue', desc: 'Détecte les CV en français et en anglais, adapte les sections automatiquement.' },
-              { icon: '🤖', title: 'IA locale Ollama', desc: 'Adaptez votre CV à chaque offre d\'emploi en un clic. Score de matching, compétences manquantes, reformulation des expériences.' },
-              { icon: '🔒', title: '100% local', desc: 'Aucune donnée envoyée en ligne. L\'IA tourne sur votre machine avec Ollama.' },
+              { icon: '✨', title: 'Adaptation par IA', desc: 'Adaptez votre CV à chaque offre d\'emploi en un clic. Score de matching, compétences manquantes, reformulation des expériences.' },
+              { icon: '✉️', title: 'Lettre de motivation', desc: 'Générez une lettre personnalisée à partir de votre CV et de l\'offre visée (offre Premium).' },
             ].map(f => (
               <div key={f.title} className="lp-feature-card">
                 <span className="lp-feature-icon">{f.icon}</span>
@@ -168,6 +173,8 @@ export default function LandingPage({ onStart }) {
           </div>
         </div>
       </section>
+
+      <PricingSection onStart={onStart} />
 
       {/* ── Final CTA ── */}
       <section className="lp-cta-section">

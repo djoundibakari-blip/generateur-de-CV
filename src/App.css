@@ -1118,3 +1118,109 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   display: flex; align-items: center; gap: 6px;
 }
 .adapt-url-error::before { content: '⚠'; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PRICING
+   ═══════════════════════════════════════════════════════════════════════ */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+}
+.pricing-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px 24px;
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.pricing-card--highlight {
+  border-color: var(--primary);
+  background: rgba(155,89,182,.06);
+}
+.pricing-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--primary); color: white;
+  font-size: 11px; font-weight: 700; letter-spacing: .5px;
+  padding: 4px 12px; border-radius: 20px; white-space: nowrap;
+}
+.pricing-name { font-size: 19px; font-weight: 800; color: white; margin-bottom: 4px; }
+.pricing-tagline { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; min-height: 34px; }
+.pricing-price { display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px; }
+.pricing-price-num { font-size: 32px; font-weight: 900; color: white; }
+.pricing-price-period { font-size: 13px; color: var(--text-muted); }
+.pricing-credits { font-size: 12px; color: var(--primary); font-weight: 600; margin-bottom: 20px; }
+.pricing-features { list-style: none; flex: 1; margin-bottom: 24px; }
+.pricing-features li {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 13px; line-height: 1.5; padding: 6px 0;
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+.pricing-features li:first-child { border-top: none; }
+.pricing-feat-yes { color: var(--text); }
+.pricing-feat-no  { color: var(--text-muted); opacity: .55; }
+.pricing-feat-icon { flex-shrink: 0; font-weight: 700; }
+.pricing-feat-yes .pricing-feat-icon { color: var(--primary); }
+.pricing-cta {
+  width: 100%; padding: 12px; border-radius: var(--r-s);
+  font-size: 14px; font-weight: 700; font-family: var(--font);
+  border: 1.5px solid var(--border); background: transparent; color: var(--text);
+  cursor: pointer; transition: all var(--ease);
+}
+.pricing-cta:disabled { opacity: .5; cursor: not-allowed; }
+.pricing-cta--free {
+  background: var(--primary); border-color: var(--primary); color: white;
+}
+.pricing-cta--free:hover { background: var(--primary-dark); }
+
+@media (max-width: 900px) {
+  .pricing-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 580px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ACCOUNT MENU
+   ═══════════════════════════════════════════════════════════════════════ */
+.account-btn-login {
+  background: transparent; border: 1.5px solid var(--primary); color: var(--primary);
+  border-radius: var(--r-s); padding: 8px 16px; font-size: 13px; font-weight: 700;
+  font-family: var(--font); cursor: pointer; transition: all var(--ease);
+}
+.account-btn-login:hover { background: var(--primary-soft); }
+
+.account-menu {
+  display: flex; align-items: center; gap: 10px;
+}
+.account-plan-badge {
+  font-size: 11px; font-weight: 800; letter-spacing: .5px;
+  padding: 3px 10px; border-radius: 20px;
+  background: var(--border); color: var(--text-muted);
+}
+.account-plan-badge--standard,
+.account-plan-badge--intermediate,
+.account-plan-badge--premium {
+  background: var(--primary-soft); color: var(--primary);
+}
+.account-user-name { font-size: 13px; color: var(--text); font-weight: 600; }
+.account-credits { font-size: 12px; color: var(--text-muted); }
+.account-btn-logout {
+  background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+  border-radius: var(--r-s); padding: 6px 12px; font-size: 12px; font-weight: 600;
+  font-family: var(--font); cursor: pointer; transition: all var(--ease);
+}
+.account-btn-logout:hover { color: var(--text); border-color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LOGIN MODAL
+   ═══════════════════════════════════════════════════════════════════════ */
+.login-modal-card { max-width: 380px; }
+.btn-google {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: white; color: #1F1F1F; border: 1px solid var(--border);
+  border-radius: var(--r-s); padding: 11px; font-size: 14px; font-weight: 600;
+  font-family: var(--font); cursor: pointer; transition: all var(--ease);
+}
+.btn-google:hover { background: #f2f2f2; }
+.login-test-toggle { width: 100%; }
+.login-submit { width: 100%; margin-top: 6px; justify-content: center; }
+.login-error { font-size: 12px; color: var(--danger); margin: 4px 0 8px; }
