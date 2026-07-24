@@ -10,6 +10,12 @@ import CVPreview from './components/CVPreview.jsx'
 import ImportModal from './components/ImportModal.jsx'
 import AdaptModal from './components/AdaptModal.jsx'
 import AccountMenu from './components/AccountMenu.jsx'
+import AuthPrompt from './components/AuthPrompt.jsx'
+import LoginModal from './components/LoginModal.jsx'
+import { usePlan } from './context/PlanContext.jsx'
+import { FEATURES } from '../lib/plans.js'
+
+const AUTH_PROMPT_KEY = 'cv_auth_prompt_dismissed'
 
 const mkId = () => crypto.randomUUID()
 
@@ -29,14 +35,37 @@ const INIT = {
 }
 
 export default function App() {
+  const { loading: planLoading, authenticated, can } = usePlan()
+
   const [tab, setTab] = useState('personal')
   const [cv, setCv] = useState(INIT)
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
   const [adapting, setAdapting]   = useState(false)
   const [prevCv, setPrevCv]       = useState(null)
+  const [loginPrompt, setLoginPrompt] = useState(false)
 
   const [started, setStarted] = useState(false)
+
+  const [authPromptDismissed, setAuthPromptDismissed] = useState(
+    () => typeof window !== 'undefined' && sessionStorage.getItem(AUTH_PROMPT_KEY) === '1'
+  )
+  const dismissAuthPrompt = () => {
+    sessionStorage.setItem(AUTH_PROMPT_KEY, '1')
+    setAuthPromptDismissed(true)
+  }
+
+  const canImport = can(FEATURES.IMPORT_CV)
+  const canAdapt  = can(FEATURES.AI_ADAPT)
+
+  const handleImportClick = () => {
+    if (!canImport) { setLoginPrompt(true); return }
+    setImporting(true)
+  }
+  const handleAdaptClick = () => {
+    if (!canAdapt) { setLoginPrompt(true); return }
+    setAdapting(true)
+  }
 
   const handleImport = (parsed) => { setCv(parsed); setTab('personal') }
 
@@ -150,10 +179,25 @@ export default function App() {
     }
   }
 
-  if (!started) return <LandingPage onStart={() => setStarted(true)} />
+  const authPrompt = !planLoading && !authenticated && !authPromptDismissed && (
+    <AuthPrompt onDismiss={dismissAuthPrompt} />
+  )
+
+  if (!started) {
+    return (
+      <>
+        <LandingPage onStart={() => setStarted(true)} />
+        {authPrompt}
+      </>
+    )
+  }
 
   return (
     <div className="app">
+      {authPrompt}
+
+      {loginPrompt && <LoginModal onClose={() => setLoginPrompt(false)} />}
+
       {importing && (
         <ImportModal
           onClose={() => setImporting(false)}
@@ -175,14 +219,16 @@ export default function App() {
           <span className="brand-name">CV Builder</span>
         </div>
         <div className="header-actions">
-          <button className="btn-import" onClick={() => setImporting(true)}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
+          <button className={`btn-import${canImport ? '' : ' btn-locked'}`} onClick={handleImportClick}>
+            {canImport ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            ) : '🔒'}
             Importer un CV
           </button>
-          <button className="btn-adapt" onClick={() => setAdapting(true)}>
-            ✨ Adapter au poste
+          <button className={`btn-adapt${canAdapt ? '' : ' btn-locked'}`} onClick={handleAdaptClick}>
+            {canAdapt ? '✨' : '🔒'} Adapter au poste
           </button>
           {prevCv && (
             <button className="btn-undo" onClick={() => { setCv(prevCv); setPrevCv(null) }} title="Annuler l'adaptation IA">

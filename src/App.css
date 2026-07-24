@@ -1224,3 +1224,34 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 .login-test-toggle { width: 100%; }
 .login-submit { width: 100%; margin-top: 6px; justify-content: center; }
 .login-error { font-size: 12px; color: var(--danger); margin: 4px 0 8px; }
+
+/* ── Boutons verrouillés (feature non incluse dans le plan) ── */
+.btn-import.btn-locked,
+.btn-adapt.btn-locked {
+  background: transparent; color: var(--text-muted);
+  border: 1.5px dashed var(--border); box-shadow: none;
+}
+.btn-import.btn-locked:hover,
+.btn-adapt.btn-locked:hover { border-color: var(--text-muted); color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH PROMPT (interstitiel à l'arrivée sur le site)
+   ═══════════════════════════════════════════════════════════════════════ */
+.auth-prompt-card { max-width: 420px; }
+.auth-prompt-body { text-align: center; padding: 36px 32px; }
+.auth-prompt-icon { font-size: 36px; display: block; margin-bottom: 14px; }
+.auth-prompt-title { font-size: 20px; font-weight: 800; color: white; margin-bottom: 10px; }
+.auth-prompt-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+.auth-prompt-actions { display: flex; flex-direction: column; gap: 10px; }
+.auth-prompt-btn-primary {
+  background: var(--primary); color: white; border: none;
+  border-radius: var(--r-s); padding: 12px; font-size: 14px; font-weight: 700;
+  font-family: var(--font); cursor: pointer; transition: all var(--ease);
+}
+.auth-prompt-btn-primary:hover { background: var(--primary-dark); }
+.auth-prompt-btn-secondary {
+  background: transparent; color: var(--text-muted); border: 1.5px solid var(--border);
+  border-radius: var(--r-s); padding: 12px; font-size: 14px; font-weight: 600;
+  font-family: var(--font); cursor: pointer; transition: all var(--ease);
+}
+.auth-prompt-btn-secondary:hover { color: var(--text); border-color: var(--text-muted); }
