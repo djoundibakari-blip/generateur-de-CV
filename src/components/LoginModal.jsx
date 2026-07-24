@@ -3,6 +3,13 @@ import { createPortal } from 'react-dom'
 import { signIn } from 'next-auth/react'
 import { usePlan } from '../context/PlanContext.jsx'
 
+// Comptes de démo (phase de test uniquement — voir memoire projet_test_accounts)
+const TEST_ACCOUNTS = [
+  { email: 'test@generateur-cv.test', label: 'Gratuit' },
+  { email: 'admin@generateur-cv.test', label: 'Premium' },
+]
+const TEST_PASSWORD = 'cvtest-594dacf4'
+
 export default function LoginModal({ onClose }) {
   const { refresh } = usePlan()
   const [showTestForm, setShowTestForm] = useState(false)
@@ -61,27 +68,43 @@ export default function LoginModal({ onClose }) {
               Compte de test (email / mot de passe)
             </button>
           ) : (
-            <form onSubmit={handleTestLogin}>
-              <div className="field">
-                <label className="field-label">Email</label>
-                <input
-                  className="field-input" type="email" required autoFocus
-                  value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="test@generateur-cv.test"
-                />
+            <>
+              <div className="login-demo-hint">
+                <p className="login-demo-hint-title">Comptes de démonstration (phase de test)</p>
+                {TEST_ACCOUNTS.map(acc => (
+                  <button
+                    type="button" key={acc.email} className="login-demo-account"
+                    onClick={() => { setEmail(acc.email); setPassword(TEST_PASSWORD) }}
+                  >
+                    <span className="login-demo-email">{acc.email}</span>
+                    <span className="login-demo-plan">{acc.label}</span>
+                  </button>
+                ))}
+                <p className="login-demo-password">Mot de passe : <code>{TEST_PASSWORD}</code></p>
               </div>
-              <div className="field">
-                <label className="field-label">Mot de passe</label>
-                <input
-                  className="field-input" type="password" required
-                  value={password} onChange={e => setPassword(e.target.value)}
-                />
-              </div>
-              {error && <p className="login-error">{error}</p>}
-              <button className="btn-export login-submit" type="submit" disabled={loading}>
-                {loading ? 'Connexion…' : 'Se connecter'}
-              </button>
-            </form>
+
+              <form onSubmit={handleTestLogin}>
+                <div className="field">
+                  <label className="field-label">Email</label>
+                  <input
+                    className="field-input" type="email" required autoFocus
+                    value={email} onChange={e => setEmail(e.target.value)}
+                    placeholder="test@generateur-cv.test"
+                  />
+                </div>
+                <div className="field">
+                  <label className="field-label">Mot de passe</label>
+                  <input
+                    className="field-input" type="password" required
+                    value={password} onChange={e => setPassword(e.target.value)}
+                  />
+                </div>
+                {error && <p className="login-error">{error}</p>}
+                <button className="btn-export login-submit" type="submit" disabled={loading}>
+                  {loading ? 'Connexion…' : 'Se connecter'}
+                </button>
+              </form>
+            </>
           )}
         </div>
       </div>
