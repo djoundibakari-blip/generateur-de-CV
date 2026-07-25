@@ -1,4 +1,8 @@
+import { useState } from 'react'
 import { PLANS, PLAN_ORDER, FEATURE_LABELS, FEATURE_DISPLAY_ORDER } from '../../lib/plans.js'
+import { usePlan } from '../context/PlanContext.jsx'
+import LoginModal from './LoginModal.jsx'
+import CheckoutSimulationModal from './CheckoutSimulationModal.jsx'
 
 const RECOMMENDED_PLAN = 'INTERMEDIATE'
 
@@ -8,6 +12,15 @@ function formatPrice(cents) {
 }
 
 export default function PricingSection({ onStart }) {
+  const { authenticated, plan: currentPlan } = usePlan()
+  const [showLogin, setShowLogin] = useState(false)
+  const [checkoutPlan, setCheckoutPlan] = useState(null)
+
+  const handleChoosePlan = (key) => {
+    if (!authenticated) { setShowLogin(true); return }
+    setCheckoutPlan(key)
+  }
+
   return (
     <section className="lp-section" id="tarifs">
       <div className="lp-section-inner">
@@ -18,9 +31,11 @@ export default function PricingSection({ onStart }) {
           {PLAN_ORDER.map(key => {
             const plan = PLANS[key]
             const recommended = key === RECOMMENDED_PLAN
+            const isCurrent = authenticated && currentPlan === key
             return (
               <div key={key} className={`pricing-card${recommended ? ' pricing-card--highlight' : ''}`}>
-                {recommended && <span className="pricing-badge">Le plus populaire</span>}
+                {recommended && !isCurrent && <span className="pricing-badge">Le plus populaire</span>}
+                {isCurrent && <span className="pricing-badge pricing-badge--current">Votre offre actuelle</span>}
                 <h3 className="pricing-name">{plan.name}</h3>
                 <p className="pricing-tagline">{plan.tagline}</p>
                 <div className="pricing-price">
@@ -45,9 +60,11 @@ export default function PricingSection({ onStart }) {
 
                 {key === 'FREE' ? (
                   <button className="pricing-cta pricing-cta--free" onClick={onStart}>Commencer gratuitement</button>
+                ) : isCurrent ? (
+                  <button className="pricing-cta" disabled>Offre actuelle</button>
                 ) : (
-                  <button className="pricing-cta" disabled title="Paiement en cours de mise en place">
-                    Bientôt disponible
+                  <button className="pricing-cta pricing-cta--free" onClick={() => handleChoosePlan(key)}>
+                    Choisir cette offre
                   </button>
                 )}
               </div>
@@ -55,6 +72,11 @@ export default function PricingSection({ onStart }) {
           })}
         </div>
       </div>
+
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+      {checkoutPlan && (
+        <CheckoutSimulationModal planKey={checkoutPlan} onClose={() => setCheckoutPlan(null)} />
+      )}
     </section>
   )
 }
