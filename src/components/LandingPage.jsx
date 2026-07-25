@@ -1,174 +1,108 @@
+import { useEffect, useState } from 'react'
 import AccountMenu from './AccountMenu.jsx'
 import PricingSection from './PricingSection.jsx'
 
+const FEATURES = [
+  { num: '01', title: 'Extraction intelligente', desc: 'Parser regex + OCR pour lire vos CV existants au format PDF, Word, image ou texte brut.' },
+  { num: '02', title: 'Adaptation par IA', desc: "Adaptez votre CV à chaque offre en un clic : score de correspondance, compétences manquantes, reformulation." },
+  { num: '03', title: 'Lettre de motivation', desc: "Générée à partir de votre CV et de l'offre visée, prête à personnaliser (offre Premium)." },
+  { num: '04', title: 'Export PDF fidèle', desc: 'Génération serveur pour une mise en page parfaite, pixel perfect, prête à envoyer.' },
+  { num: '05', title: 'Aperçu temps réel', desc: 'Chaque frappe met à jour le CV instantanément — pas besoin de recharger la page.' },
+  { num: '06', title: 'Multilingue', desc: 'Détecte les CV en français et en anglais, et adapte les sections automatiquement.' },
+]
+
+const STEPS = [
+  { num: '01', title: 'Importez votre CV', desc: "Glissez un fichier PDF, DOCX, PNG ou TXT — l'OCR extrait automatiquement toutes vos informations." },
+  { num: '02', title: 'Personnalisez-le', desc: "Vérifiez et ajustez vos informations dans le formulaire — l'aperçu se met à jour en temps réel." },
+  { num: '03', title: "Adaptez-le à l'offre", desc: "Collez une offre d'emploi : l'IA optimise votre résumé, vos compétences et vos expériences pour le poste visé." },
+  { num: '04', title: 'Exportez en PDF', desc: 'Téléchargez votre CV au format PDF, prêt à envoyer à vos recruteurs.' },
+]
+
 export default function LandingPage({ onStart }) {
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
     <div className="lp">
 
       {/* ── Nav ── */}
-      <nav className="lp-nav">
-        <div className="lp-nav-brand">
-          <span className="lp-logo">CV</span>
-          <span className="lp-logo-text">Builder</span>
+      <nav className={`lp-nav${scrolled ? ' lp-nav--scrolled' : ''}`}>
+        <div className="lp-nav-inner">
+          <div className="lp-brand">
+            <span className="lp-brand-box">CV</span>
+            <span className="lp-brand-word">CV BUILDER</span>
+          </div>
+          <ul className="lp-nav-links">
+            <li><a href="#fonctionnement">Fonctionnement</a></li>
+            <li><a href="#features">Fonctionnalités</a></li>
+            <li><a href="#tarifs">Tarifs</a></li>
+          </ul>
+          <div className="lp-nav-actions">
+            <AccountMenu />
+            <button className="lp-btn lp-btn-solid" onClick={onStart}>Commencer</button>
+          </div>
         </div>
-        <ul className="lp-nav-links">
-          <li><a href="#fonctionnement">Fonctionnement</a></li>
-          <li><a href="#features">Fonctionnalités</a></li>
-          <li><a href="#tarifs">Tarifs</a></li>
-          <li><AccountMenu /></li>
-          <li>
-            <button className="lp-nav-cta" onClick={onStart}>Commencer</button>
-          </li>
-        </ul>
       </nav>
 
       {/* ── Hero ── */}
-      <section className="lp-hero">
-        {/* Background blobs */}
-        <div className="lp-blob lp-blob-1" aria-hidden="true" />
-        <div className="lp-blob lp-blob-2" aria-hidden="true" />
-
-        <div className="lp-hero-content">
-          <p className="lp-hero-eyebrow">Générateur de CV professionnel</p>
-          <h1 className="lp-hero-title">
-            <span className="lp-title-line">Votre CV,</span>
-            <span className="lp-title-line lp-title-accent">Réinventé.</span>
+      <section className="lp-hero" id="top">
+        <div className="lp-hero-inner">
+          <span className="lp-eyebrow"><span className="lp-live-dot"></span>Générateur de CV &amp; lettres · IA active</span>
+          <h1 className="lp-hero-title lp-stack">
+            <span className="lp-l lp-l-solid">Votre CV,</span>
+            <span className="lp-l lp-l-outline">adapté en</span>
+            <span className="lp-l lp-l-gradient">quelques clics.</span>
           </h1>
-          <p className="lp-hero-desc">
+          <p className="lp-hero-sub">
             Créez votre CV gratuitement, ou laissez l'IA l'adapter à une offre d'emploi
             et générer votre lettre de motivation en quelques secondes.
           </p>
-          <div className="lp-hero-actions">
-            <button className="lp-btn-primary" onClick={onStart}>
-              Créer mon CV
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </button>
-            <a href="#fonctionnement" className="lp-btn-ghost">Voir comment ça marche</a>
-          </div>
-
-          {/* Stats */}
-          <div className="lp-stats">
-            <div className="lp-stat"><span className="lp-stat-num">PDF</span><span className="lp-stat-label">Export haute qualité</span></div>
-            <div className="lp-stat-sep" />
-            <div className="lp-stat"><span className="lp-stat-num">OCR</span><span className="lp-stat-label">Lecture automatique</span></div>
-            <div className="lp-stat-sep" />
-            <div className="lp-stat"><span className="lp-stat-num">4</span><span className="lp-stat-label">Offres, du gratuit au premium</span></div>
+          <div className="lp-hero-cta">
+            <button className="lp-btn lp-btn-solid lp-btn-lg" onClick={onStart}>Créer mon CV →</button>
+            <a className="lp-btn lp-btn-outline lp-btn-lg" href="#fonctionnement">Voir comment ça marche</a>
           </div>
         </div>
-
-        {/* CV mockup */}
-        <div className="lp-hero-visual" aria-hidden="true">
-          <div className="lp-cv-mock">
-            <div className="lp-mock-header">
-              <div className="lp-mock-avatar" />
-              <div className="lp-mock-lines">
-                <div className="lp-mock-line lp-mock-line--wide" />
-                <div className="lp-mock-line lp-mock-line--med" />
-              </div>
-            </div>
-            <div className="lp-mock-sidebar">
-              <div className="lp-mock-section">
-                <div className="lp-mock-label" />
-                <div className="lp-mock-line" /><div className="lp-mock-line lp-mock-line--sm" />
-                <div className="lp-mock-line lp-mock-line--med" />
-              </div>
-              <div className="lp-mock-section">
-                <div className="lp-mock-label" />
-                <div className="lp-mock-line lp-mock-line--sm" />
-                <div className="lp-mock-line" />
-                <div className="lp-mock-line lp-mock-line--sm" />
-                <div className="lp-mock-line lp-mock-line--med" />
-              </div>
-            </div>
-            <div className="lp-mock-main">
-              <div className="lp-mock-section">
-                <div className="lp-mock-label lp-mock-label--dark" />
-                <div className="lp-mock-rule" />
-                <div className="lp-mock-line lp-mock-line--full" />
-                <div className="lp-mock-line lp-mock-line--full" />
-                <div className="lp-mock-line lp-mock-line--med" />
-              </div>
-              <div className="lp-mock-section">
-                <div className="lp-mock-label lp-mock-label--dark" />
-                <div className="lp-mock-rule" />
-                <div className="lp-mock-entry">
-                  <div className="lp-mock-line lp-mock-line--wide" />
-                  <div className="lp-mock-line lp-mock-line--sm" />
-                </div>
-                <div className="lp-mock-entry">
-                  <div className="lp-mock-line lp-mock-line--med" />
-                  <div className="lp-mock-line lp-mock-line--sm" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Side dots */}
-        <div className="lp-side-dots" aria-hidden="true">
-          {[0,1,2,3,4].map(i => <span key={i} className={`lp-dot${i === 2 ? ' lp-dot--active' : ''}`} />)}
-        </div>
+        <div className="lp-scroll-cue"><div className="lp-scroll-mouse"><i></i></div><span>Scroll</span></div>
       </section>
 
-      {/* ── How it works ── */}
+      {/* ── Comment ça marche ── */}
       <section className="lp-section" id="fonctionnement">
         <div className="lp-section-inner">
-          <p className="lp-section-eyebrow">Simple &amp; Rapide</p>
-          <h2 className="lp-section-title">Comment ça marche ?</h2>
-          <div className="lp-steps">
-            <div className="lp-step">
-              <div className="lp-step-num">01</div>
-              <div className="lp-step-icon">📂</div>
-              <h3>Importez votre CV</h3>
-              <p>Glissez un fichier PDF, DOCX, PNG ou TXT. L'OCR extrait automatiquement toutes vos informations.</p>
-            </div>
-            <div className="lp-step-arrow">→</div>
-            <div className="lp-step">
-              <div className="lp-step-num">02</div>
-              <div className="lp-step-icon">✏️</div>
-              <h3>Personnalisez</h3>
-              <p>Vérifiez et ajustez vos informations dans le formulaire. L'aperçu se met à jour en temps réel.</p>
-            </div>
-            <div className="lp-step-arrow">→</div>
-            <div className="lp-step">
-              <div className="lp-step-num">03</div>
-              <div className="lp-step-icon">✨</div>
-              <h3>Adaptez avec l'IA</h3>
-              <p>Collez une offre d'emploi — l'IA locale (Ollama) optimise votre résumé, compétences et expériences pour le poste visé.</p>
-            </div>
-            <div className="lp-step-arrow">→</div>
-            <div className="lp-step">
-              <div className="lp-step-num">04</div>
-              <div className="lp-step-icon">📄</div>
-              <h3>Exportez en PDF</h3>
-              <p>Téléchargez votre CV au format PDF, prêt à envoyer à vos recruteurs.</p>
-            </div>
+          <div className="lp-left-head">
+            <span className="lp-eyebrow">Comment ça marche ?</span>
+            <h2 className="lp-left-title">De votre CV brut <span className="lp-dim">au document prêt à envoyer.</span></h2>
           </div>
+          <ol className="lp-workflow-list">
+            {STEPS.map(s => (
+              <li className="lp-workflow-row" key={s.num}>
+                <span className="lp-workflow-num">{s.num}</span>
+                <div><h3>{s.title}</h3><p>{s.desc}</p></div>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      {/* ── Features ── */}
-      <section className="lp-section lp-section--dark" id="features">
+      {/* ── Fonctionnalités ── */}
+      <section className="lp-section" id="features">
         <div className="lp-section-inner">
-          <p className="lp-section-eyebrow">Fonctionnalités</p>
-          <h2 className="lp-section-title">Tout ce dont vous avez besoin</h2>
-          <div className="lp-features">
-            {[
-              { icon: '🤖', title: 'Extraction intelligente', desc: 'Parser regex + OCR Tesseract pour lire PDF, Word, images et texte brut.' },
-              { icon: '🎨', title: 'Template élégant', desc: 'Design professionnel dark navy avec palette Moon — sidebar, header, sections colorées.' },
-              { icon: '📥', title: 'Export PDF fidèle', desc: 'Génération serveur pour une mise en page parfaite, pixel perfect.' },
-              { icon: '⚡', title: 'Aperçu temps réel', desc: 'Chaque frappe met à jour le CV instantanément — pas besoin de recharger.' },
-              { icon: '🌍', title: 'Multilingue', desc: 'Détecte les CV en français et en anglais, adapte les sections automatiquement.' },
-              { icon: '✨', title: 'Adaptation par IA', desc: 'Adaptez votre CV à chaque offre d\'emploi en un clic. Score de matching, compétences manquantes, reformulation des expériences.' },
-              { icon: '✉️', title: 'Lettre de motivation', desc: 'Générez une lettre personnalisée à partir de votre CV et de l\'offre visée (offre Premium).' },
-            ].map(f => (
-              <div key={f.title} className="lp-feature-card">
-                <span className="lp-feature-icon">{f.icon}</span>
+          <div className="lp-split-head">
+            <span className="lp-eyebrow">Fonctionnalités</span>
+            <h2 className="lp-split-title">Tout ce qu'il faut <span className="lp-dim">pour candidater vite.</span></h2>
+          </div>
+          <div className="lp-feature-grid">
+            {FEATURES.map(f => (
+              <article className="lp-feature" key={f.num}>
+                <span className="lp-feature-num">{f.num}</span>
                 <h3>{f.title}</h3>
                 <p>{f.desc}</p>
-              </div>
+              </article>
             ))}
           </div>
         </div>
@@ -176,26 +110,33 @@ export default function LandingPage({ onStart }) {
 
       <PricingSection onStart={onStart} />
 
-      {/* ── Final CTA ── */}
-      <section className="lp-cta-section">
-        <div className="lp-blob lp-blob-3" aria-hidden="true" />
-        <h2 className="lp-cta-title">Prêt à créer votre CV ?</h2>
-        <p className="lp-cta-sub">Aucune inscription requise. Commencez maintenant.</p>
-        <button className="lp-btn-primary lp-btn-large" onClick={onStart}>
-          Commencer gratuitement
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
-        </button>
+      {/* ── CTA finale ── */}
+      <section className="lp-cta-final">
+        <div className="lp-section-inner">
+          <div className="lp-cta-grid">
+            <div>
+              <span className="lp-eyebrow">Commencer</span>
+              <h2 className="lp-cta-title lp-stack">
+                <span className="lp-l lp-l-solid">Prêt à créer</span>
+                <span className="lp-l lp-l-outline">votre prochain</span>
+                <span className="lp-l lp-l-gradient">CV ?</span>
+              </h2>
+              <p className="lp-cta-sub">Le mode manuel est gratuit et sans inscription. Passez à l'IA quand vous êtes prêt.</p>
+            </div>
+            <button className="lp-btn lp-btn-solid lp-btn-lg" onClick={onStart}>Commencer maintenant →</button>
+          </div>
+        </div>
       </section>
 
       {/* ── Footer ── */}
       <footer className="lp-footer">
-        <div className="lp-footer-brand">
-          <span className="lp-logo">CV</span>
-          <span className="lp-logo-text">Builder</span>
+        <div className="lp-footer-inner">
+          <div className="lp-brand">
+            <span className="lp-brand-box">CV</span>
+            <span className="lp-brand-word">CV BUILDER</span>
+          </div>
+          <span className="lp-footer-caption">Export PDF · IA Groq · Fait avec Next.js</span>
         </div>
-        <p className="lp-footer-copy">© 2025 — Tous droits réservés</p>
       </footer>
 
     </div>

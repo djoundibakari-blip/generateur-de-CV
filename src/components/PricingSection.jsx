@@ -24,8 +24,10 @@ export default function PricingSection({ onStart }) {
   return (
     <section className="lp-section" id="tarifs">
       <div className="lp-section-inner">
-        <p className="lp-section-eyebrow">Tarifs</p>
-        <h2 className="lp-section-title">Une offre pour chaque besoin</h2>
+        <div className="lp-left-head">
+          <span className="lp-eyebrow">Tarifs</span>
+          <h2 className="lp-left-title">Une offre <span className="lp-dim">pour chaque besoin.</span></h2>
+        </div>
 
         <div className="pricing-grid">
           {PLAN_ORDER.map(key => {
