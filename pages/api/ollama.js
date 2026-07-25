@@ -7,6 +7,15 @@ const OLLAMA       = process.env.OLLAMA_URL   || 'http://localhost:11434'
 const GROQ_API_KEY = process.env.GROQ_API_KEY || ''
 const GROQ_MODEL   = process.env.GROQ_MODEL   || 'openai/gpt-oss-120b'
 
+/* Erreur IA typée : permet aux handlers de renvoyer le vrai motif d'échec
+   (rate limit, panne réseau...) au lieu d'un message générique. */
+class AIError extends Error {
+  constructor(status, message) {
+    super(message)
+    this.status = status
+  }
+}
+
 function extractJSON(content) {
   content = content.replace(/^```(?:json)?\s*/gm, '').replace(/\s*```$/gm, '')
   const m = content.match(/\{[\s\S]+\}/u)
@@ -16,8 +25,9 @@ function extractJSON(content) {
 
 /* ── Groq (cloud, OpenAI-compatible) ── */
 async function groqChat(messages, { numPredict, temperature = 0.15 }) {
+  let res
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type':  'application/json',
@@ -36,17 +46,23 @@ async function groqChat(messages, { numPredict, temperature = 0.15 }) {
       }),
       signal: AbortSignal.timeout(120000),
     })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      console.error('Groq error:', err)
-      return null
-    }
-    const data = await res.json()
-    return extractJSON(data.choices?.[0]?.message?.content ?? '')
   } catch (e) {
     console.error('groqChat exception:', e)
-    return null
+    throw new AIError(503, "Impossible de contacter le service IA. Réessayez dans un instant.")
   }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    console.error('Groq error:', err)
+    if (err?.error?.code === 'rate_limit_exceeded') {
+      const wait = err.error.message?.match(/try again in ([\d.]+)s/)?.[1]
+      throw new AIError(429, wait
+        ? `Limite de débit de l'IA atteinte — réessayez dans ${Math.ceil(Number(wait))} secondes.`
+        : "Limite de débit de l'IA atteinte — réessayez dans quelques secondes.")
+    }
+    throw new AIError(502, "Le service IA a retourné une erreur. Réessayez dans un instant.")
+  }
+  const data = await res.json()
+  return extractJSON(data.choices?.[0]?.message?.content ?? '')
 }
 
 /* ── Ollama (local) ── */
@@ -63,11 +79,12 @@ async function ollamaChat(model, messages, { numPredict, numCtx, timeout, temper
       }),
       signal: controller.signal,
     })
-    if (!res.ok) return null
+    if (!res.ok) throw new AIError(502, 'Ollama a retourné une erreur. Réessayez dans un instant.')
     const data = await res.json()
     return extractJSON(data.message?.content ?? '')
-  } catch {
-    return null
+  } catch (e) {
+    if (e instanceof AIError) throw e
+    throw new AIError(503, 'Ollama ne répond pas. Lancez : ollama serve')
   } finally {
     clearTimeout(timer)
   }
@@ -159,12 +176,18 @@ Règles strictes :
 - Projets : repère les projets techniques (souvent une liste du type "Projet X : description (technologies)" sous un intitulé "Projets"/"Réalisations", ou en sous-puces d'une entrée de formation/alternance) et extrais CHACUN comme une entrée distincte du tableau "projets" — jamais dans "experiences" — avec : nom (ex. "Projet ESN"), technologies (les outils/langages cités, souvent entre parenthèses ou après une virgule en fin de ligne), lien (URL GitHub/démo si présente), description (le reste du texte, sans le nom ni la liste de technologies)
 - Ne mélange jamais un projet avec une expérience professionnelle rémunérée : si le texte source ne donne ni employeur ni contrat, c'est un projet, pas une expérience`
 
-    const result = await callAI(model, [
-      { role: 'system', content: system },
-      { role: 'user',   content: `## TEXTE BRUT DU CV (peut être désordonné si PDF 2 colonnes)\n${cvText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"personal":{"prenom":"","nom":"","headline":"","email":"","telephone":"","resume":"","localisation":"","github":""},"experiences":[{"poste":"","entreprise":"","debut":"","fin":"","description":""}],"projets":[{"nom":"","technologies":"","lien":"","description":""}],"formations":[{"diplome":"","ecole":"","debut":"","fin":"","description":""}],"competences":[{"nom":"","niveau":""}],"qualites":[{"nom":""}],"langues":[{"nom":"","niveau":""}],"passions":[{"nom":""}]}` },
-    ], { numPredict: 2500, numCtx: 4096, timeout: 360, temperature: 0.1 })
+    let result
+    try {
+      result = await callAI(model, [
+        { role: 'system', content: system },
+        { role: 'user',   content: `## TEXTE BRUT DU CV (peut être désordonné si PDF 2 colonnes)\n${cvText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"personal":{"prenom":"","nom":"","headline":"","email":"","telephone":"","resume":"","localisation":"","github":""},"experiences":[{"poste":"","entreprise":"","debut":"","fin":"","description":""}],"projets":[{"nom":"","technologies":"","lien":"","description":""}],"formations":[{"diplome":"","ecole":"","debut":"","fin":"","description":""}],"competences":[{"nom":"","niveau":""}],"qualites":[{"nom":""}],"langues":[{"nom":"","niveau":""}],"passions":[{"nom":""}]}` },
+      ], { numPredict: 2500, numCtx: 4096, timeout: 360, temperature: 0.1 })
+    } catch (e) {
+      if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+      throw e
+    }
 
-    if (!result) return res.status(503).json({ error: 'Ollama ne répond pas (parse).' })
+    if (!result) return res.status(502).json({ error: "Réponse de l'IA illisible (JSON invalide). Réessayez." })
     return res.json(result)
   }
 
@@ -183,12 +206,18 @@ Règles strictes :
 - Garde le wording EXACT de l'offre pour experience_requise
 - Si une info est absente : chaîne vide ""`
 
-    const result = await callAI(model, [
-      { role: 'system', content: system },
-      { role: 'user',   content: `## OFFRE D'EMPLOI\n${offerText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"poste":"","entreprise":"","secteur":"","contrat":"","localisation":"","experience_requise":"","niveau_etudes":"","stack_obligatoire":[],"stack_souhaitee":[],"soft_skills":[],"missions_principales":[]}` },
-    ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1 })
+    let result
+    try {
+      result = await callAI(model, [
+        { role: 'system', content: system },
+        { role: 'user',   content: `## OFFRE D'EMPLOI\n${offerText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"poste":"","entreprise":"","secteur":"","contrat":"","localisation":"","experience_requise":"","niveau_etudes":"","stack_obligatoire":[],"stack_souhaitee":[],"soft_skills":[],"missions_principales":[]}` },
+      ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1 })
+    } catch (e) {
+      if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+      throw e
+    }
 
-    if (!result) return res.status(503).json({ error: 'Ollama ne répond pas (extract_job).' })
+    if (!result) return res.status(502).json({ error: "Réponse de l'IA illisible (JSON invalide). Réessayez." })
     return res.json(result)
   }
 
@@ -197,12 +226,18 @@ Règles strictes :
     const cvSlim = slimCV(cv)
     const cvJson = JSON.stringify(cvSlim, null, 2)
 
-    const result = await callAI(model, [
-      { role: 'system', content: 'Tu es un expert RH senior et coach carrière.\nTu réponds UNIQUEMENT avec du JSON valide, sans markdown, sans texte avant ou après.' },
-      { role: 'user',   content: `## CV À ANALYSER (JSON)\n${cvJson}\n\n## MISSION\n1. Score de qualité global (0–100) : clarté, exhaustivité, impact des descriptions, cohérence.\n2. 3 à 5 points forts (ce qui est bien fait).\n3. 3 à 5 points faibles ou axes d'amélioration concrets.\n4. 3 à 5 suggestions d'amélioration actionnables et précises.\n5. Sections importantes manquantes ou trop courtes.\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":68,"points_forts":[],"points_faibles":[],"suggestions":[],"sections_manquantes":[]}` },
-    ], { numPredict: 1500, numCtx: 3072, timeout: 300, temperature: 0.3 })
+    let result
+    try {
+      result = await callAI(model, [
+        { role: 'system', content: 'Tu es un expert RH senior et coach carrière.\nTu réponds UNIQUEMENT avec du JSON valide, sans markdown, sans texte avant ou après.' },
+        { role: 'user',   content: `## CV À ANALYSER (JSON)\n${cvJson}\n\n## MISSION\n1. Score de qualité global (0–100) : clarté, exhaustivité, impact des descriptions, cohérence.\n2. 3 à 5 points forts (ce qui est bien fait).\n3. 3 à 5 points faibles ou axes d'amélioration concrets.\n4. 3 à 5 suggestions d'amélioration actionnables et précises.\n5. Sections importantes manquantes ou trop courtes.\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":68,"points_forts":[],"points_faibles":[],"suggestions":[],"sections_manquantes":[]}` },
+      ], { numPredict: 1500, numCtx: 3072, timeout: 300, temperature: 0.3 })
+    } catch (e) {
+      if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+      throw e
+    }
 
-    if (!result) return res.status(503).json({ error: 'Ollama ne répond pas (analyze).' })
+    if (!result) return res.status(502).json({ error: "Réponse de l'IA illisible (JSON invalide). Réessayez." })
     return res.json(result)
   }
 
@@ -218,13 +253,18 @@ Règles strictes :
     /* fallback : extraction inline si exigences pas encore extraites */
     if (!jobRequirements) {
       const offerText = jobOfferRaw.slice(0, 3000)
-      jobRequirements = await callAI(model, [
-        { role: 'system', content: 'Tu es un recruteur expert. JSON uniquement, sans markdown.' },
-        { role: 'user',   content: `## OFFRE\n${offerText}\n\n## FORMAT JSON\n{"poste":"","stack_obligatoire":[],"stack_souhaitee":[],"soft_skills":[],"experience_requise":"","niveau_etudes":"","missions_principales":[]}` },
-      ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1 })
+      try {
+        jobRequirements = await callAI(model, [
+          { role: 'system', content: 'Tu es un recruteur expert. JSON uniquement, sans markdown.' },
+          { role: 'user',   content: `## OFFRE\n${offerText}\n\n## FORMAT JSON\n{"poste":"","stack_obligatoire":[],"stack_souhaitee":[],"soft_skills":[],"experience_requise":"","niveau_etudes":"","missions_principales":[]}` },
+        ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1 })
+      } catch (e) {
+        if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+        throw e
+      }
 
       if (!jobRequirements) {
-        return res.status(503).json({ error: 'Échec extraction offre (Agent 2 fallback).' })
+        return res.status(502).json({ error: "Réponse de l'IA illisible lors de l'extraction de l'offre. Réessayez." })
       }
     }
 
@@ -243,12 +283,18 @@ RÈGLES ABSOLUES — HALLUCINATION INTERDITE :
 5. Score honnête (0-100) basé sur la réelle correspondance, pas optimiste
 6. Utilise les mots-clés EXACTS de l'offre dans les reformulations quand c'est justifié`
 
-    const result = await callAI(model, [
-      { role: 'system', content: system },
-      { role: 'user',   content: `## EXIGENCES DU POSTE (JSON — extrait par Agent 2)\n${exigencesJson}\n\n## CV DU CANDIDAT (JSON)\n${cvJson}\n\n## MISSION\n1. Réécris personal.resume : mets en avant les points qui matchent l'offre (max 500 car.).\n2. Adapte personal.headline au poste si pertinent, sinon conserve-le.\n3. Pour chaque expérience : reformule description avec les mots-clés du poste (garde les faits).\n4. Réordonne competences : stack_obligatoire en premier, puis stack_souhaitee, puis reste.\n5. Score de correspondance (0–100) honnête.\n6. Compétences du poste absentes du CV → missing_skills (max 8).\n7. Pour chaque item de stack_obligatoire, stack_souhaitee, soft_skills, experience_requise :\n   indique si couvert par le CV avec une courte explication.\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":72,"missing_skills":[],"headline":"","resume":"","experiences":[{"id":"ID_EXACT_DU_CV","description":""}],"competences":[{"id":"ID_EXACT_DU_CV","nom":"","niveau":""}],"comparaison":[{"exigence":"","present":true,"detail":""}]}` },
-    ], { numPredict: 2500, numCtx: 4096, timeout: 540, temperature: 0.2 })
+    let result
+    try {
+      result = await callAI(model, [
+        { role: 'system', content: system },
+        { role: 'user',   content: `## EXIGENCES DU POSTE (JSON — extrait par Agent 2)\n${exigencesJson}\n\n## CV DU CANDIDAT (JSON)\n${cvJson}\n\n## MISSION\n1. Réécris personal.resume : mets en avant les points qui matchent l'offre (max 500 car.).\n2. Adapte personal.headline au poste si pertinent, sinon conserve-le.\n3. Pour chaque expérience : reformule description avec les mots-clés du poste (garde les faits).\n4. Réordonne competences : stack_obligatoire en premier, puis stack_souhaitee, puis reste.\n5. Score de correspondance (0–100) honnête.\n6. Compétences du poste absentes du CV → missing_skills (max 8).\n7. Pour chaque item de stack_obligatoire, stack_souhaitee, soft_skills, experience_requise :\n   indique si couvert par le CV avec une courte explication.\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":72,"missing_skills":[],"headline":"","resume":"","experiences":[{"id":"ID_EXACT_DU_CV","description":""}],"competences":[{"id":"ID_EXACT_DU_CV","nom":"","niveau":""}],"comparaison":[{"exigence":"","present":true,"detail":""}]}` },
+      ], { numPredict: 2500, numCtx: 4096, timeout: 540, temperature: 0.2 })
+    } catch (e) {
+      if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+      throw e
+    }
 
-    if (!result) return res.status(500).json({ error: 'Agent 3 (adapt) : JSON invalide ou timeout.' })
+    if (!result) return res.status(502).json({ error: "Réponse de l'IA illisible (JSON invalide). Réessayez." })
     return res.json(result)
   }
 
