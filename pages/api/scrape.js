@@ -14,11 +14,16 @@ export default async function handler(req, res) {
     throw e
   }
 
-  const { url } = req.body ?? {}
+  let { url } = req.body ?? {}
 
   if (!url || !/^https?:\/\//i.test(url)) {
     return res.status(400).json({ error: 'URL invalide. Utilisez une URL commençant par http:// ou https://' })
   }
+
+  /* Certains sites carrière encapsulent l'URL externe réelle dans leur propre chemin
+     (ex: https://entreprise.com/https://job-board.com/offre/123) — on la dépile. */
+  const embedded = url.match(/^https?:\/\/[^/]+\/(https?:\/\/.+)$/i)
+  if (embedded) url = embedded[1]
 
   /* Block private/local IPs */
   try {
