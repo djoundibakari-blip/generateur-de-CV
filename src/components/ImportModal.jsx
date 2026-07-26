@@ -210,10 +210,10 @@ export default function ImportModal({ onClose, onApply }) {
               }}>
                 <span>{text.length > 800 ? '✓' : '⚠'}</span>
                 <span>
-                  <strong>{text.length} caractères</strong> extraits —{' '}
+                  <strong>{text.length} caractères</strong> extraits :{' '}
                   {text.length > 800
                     ? 'texte suffisant pour l\'IA'
-                    : 'peu de texte extrait — le PDF est peut-être protégé ou en image'}
+                    : 'peu de texte extrait, le PDF est peut-être protégé ou en image'}
                 </span>
               </div>
             )}
@@ -222,7 +222,7 @@ export default function ImportModal({ onClose, onApply }) {
 
             <textarea
               className="field-input modal-textarea"
-              placeholder={`Jean Dupont\nDéveloppeur Web Full-Stack\njean@email.com  •  06 12 34 56 78\n\nPROFIL\nDéveloppeur passionné avec 3 ans d'expérience...\n\nEXPÉRIENCES\n2022 - présent  Développeur Front-End — Acme Corp\n\nFORMATIONS\n2019 - 2022  Bachelor Informatique — Epitech\n\nCOMPÉTENCES\nReact, PHP, Node.js, Figma`}
+              placeholder={`Jean Dupont\nDéveloppeur Web Full-Stack\njean@email.com  •  06 12 34 56 78\n\nPROFIL\nDéveloppeur passionné avec 3 ans d'expérience...\n\nEXPÉRIENCES\n2022 - présent  Développeur Front-End chez Acme Corp\n\nFORMATIONS\n2019 - 2022  Bachelor Informatique, Epitech\n\nCOMPÉTENCES\nReact, PHP, Node.js, Figma`}
               value={text}
               onChange={e => setText(e.target.value)}
               rows={10}
@@ -288,7 +288,7 @@ export default function ImportModal({ onClose, onApply }) {
                 <span className="adapt-spin-icon">⚙</span>
                 <div>
                   <div className="dropzone-title">L'IA analyse et organise votre CV…</div>
-                  <div className="dropzone-hint">Modèle : <strong>{model}</strong> — 60 à 120 secondes</div>
+                  <div className="dropzone-hint">Modèle : <strong>{model}</strong> (60 à 120 secondes)</div>
                 </div>
               </div>
             </div>
@@ -308,7 +308,7 @@ export default function ImportModal({ onClose, onApply }) {
           <div className="modal-body">
             <p className="modal-hint">
               {parsedBy === 'ai'
-                ? <><strong style={{ color: 'var(--primary)' }}>✨ Analyse IA</strong> — voici ce que l'IA a structuré :</>
+                ? <><strong style={{ color: 'var(--primary)' }}>✨ Analyse IA</strong> : voici ce que l'IA a structuré</>
                 : 'Voici ce que j\'ai détecté dans le texte :'
               }
             </p>

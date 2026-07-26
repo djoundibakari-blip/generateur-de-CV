@@ -117,7 +117,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
     try {
       /* ─ Agent 2 : extraction de l'offre ─ */
       setPhase('extracting_job')
-      setAgentLabel(`Agent 2 — Extraction de l'offre (${extractModel})`)
+      setAgentLabel(`Agent 2 : Extraction de l'offre (${extractModel})`)
 
       const r1   = await fetch('/api/ollama', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -131,7 +131,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
 
       /* ─ Agent 3 : adaptation du CV ─ */
       setPhase('adapting')
-      setAgentLabel(`Agent 3 — Adaptation du CV (${adaptModel})`)
+      setAgentLabel(`Agent 3 : Adaptation du CV (${adaptModel})`)
 
       const r2   = await fetch('/api/ollama', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -196,7 +196,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
-                Ollama non disponible — lancez <code>ollama serve</code> dans un terminal
+                Ollama non disponible, lancez <code>ollama serve</code> dans un terminal
               </div>
             )}
 
@@ -224,14 +224,14 @@ export default function AdaptModal({ cv, onApply, onClose }) {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {mode === 'adapt' && (
                   <div className="adapt-model-field" style={{ flex: 1, minWidth: 160 }}>
-                    <span className="adapt-model-label" title="Agent 2 — Extraction offre (rapide)">⚡ Extraction</span>
+                    <span className="adapt-model-label" title="Agent 2 : Extraction offre (rapide)">⚡ Extraction</span>
                     <select className="adapt-model-select" value={extractModel} onChange={e => setExtractModel(e.target.value)}>
                       {models.map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
                   </div>
                 )}
                 <div className="adapt-model-field" style={{ flex: 1, minWidth: 160 }}>
-                  <span className="adapt-model-label" title={mode === 'adapt' ? 'Agent 3 — Adaptation CV (précis)' : 'Analyse qualité'}>
+                  <span className="adapt-model-label" title={mode === 'adapt' ? 'Agent 3 : Adaptation CV (précis)' : 'Analyse qualité'}>
                     {mode === 'adapt' ? '✨ Adaptation' : '🔍 Analyse'}
                   </span>
                   <select className="adapt-model-select" value={adaptModel} onChange={e => setAdaptModel(e.target.value)}>
@@ -317,7 +317,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
                 <div className="modal-divider"><span>ou coller le texte</span></div>
                 <textarea
                   className="field-input modal-textarea"
-                  placeholder={`Développeur React Senior — Acme Corp\n\nMissions :\n- Développer des composants React\n- Concevoir des APIs RESTful\n\nProfil :\n- 2 ans d'expérience minimum\n- Maîtrise React, TypeScript, SQL`}
+                  placeholder={`Développeur React Senior chez Acme Corp\n\nMissions :\n- Développer des composants React\n- Concevoir des APIs RESTful\n\nProfil :\n- 2 ans d'expérience minimum\n- Maîtrise React, TypeScript, SQL`}
                   value={jobOffer}
                   onChange={e => setJobOffer(e.target.value)}
                   rows={8}
@@ -355,8 +355,8 @@ export default function AdaptModal({ cv, onApply, onClose }) {
               <div className="dropzone-inner">
                 <span className="adapt-spin-icon">⚙</span>
                 <div>
-                  <div className="dropzone-title">Agent 2 — Analyse de l'offre…</div>
-                  <div className="dropzone-hint">Modèle : <strong>{extractModel}</strong> — extraction des exigences</div>
+                  <div className="dropzone-title">Agent 2 : Analyse de l'offre…</div>
+                  <div className="dropzone-hint">Modèle : <strong>{extractModel}</strong> (extraction des exigences)</div>
                 </div>
               </div>
             </div>
@@ -371,7 +371,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
             <div className="ef-list" style={{ marginTop: 4, opacity: .45 }}>
               <div className="ef-row ef-miss">
                 <span className="ef-dot">○</span>
-                <span className="ef-val">Agent 3 — Adaptation du CV (en attente)</span>
+                <span className="ef-val">Agent 3 : Adaptation du CV (en attente)</span>
               </div>
             </div>
           </div>
@@ -384,15 +384,15 @@ export default function AdaptModal({ cv, onApply, onClose }) {
               <div className="dropzone-inner">
                 <span className="adapt-spin-icon">⚙</span>
                 <div>
-                  <div className="dropzone-title">Agent 3 — Adaptation du CV…</div>
-                  <div className="dropzone-hint">Modèle : <strong>{adaptModel}</strong> — reformulation ciblée</div>
+                  <div className="dropzone-title">Agent 3 : Adaptation du CV…</div>
+                  <div className="dropzone-hint">Modèle : <strong>{adaptModel}</strong> (reformulation ciblée)</div>
                 </div>
               </div>
             </div>
             <div className="ef-list" style={{ marginTop: 8 }}>
               <div className="ef-row ef-ok">
                 <span className="ef-dot">✓</span>
-                <span className="ef-val">Agent 2 terminé — exigences extraites</span>
+                <span className="ef-val">Agent 2 terminé, exigences extraites</span>
               </div>
             </div>
             <div className="ef-list" style={{ marginTop: 4 }}>
@@ -414,7 +414,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
                 <span className="adapt-spin-icon">⚙</span>
                 <div>
                   <div className="dropzone-title">L'IA analyse votre CV…</div>
-                  <div className="dropzone-hint">Modèle : <strong>{adaptModel}</strong> — 30 à 90 secondes</div>
+                  <div className="dropzone-hint">Modèle : <strong>{adaptModel}</strong> (30 à 90 secondes)</div>
                 </div>
               </div>
             </div>
@@ -545,7 +545,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
                     )}
                   </>
                 ) : (
-                  <div className="ef-row ef-miss"><span className="ef-dot">○</span><span className="ef-val">Aucune comparaison — essayez un modèle plus puissant</span></div>
+                  <div className="ef-row ef-miss"><span className="ef-dot">○</span><span className="ef-val">Aucune comparaison, essayez un modèle plus puissant</span></div>
                 )}
               </div>
             )}
@@ -557,6 +557,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
                   {result.resume && <div className="ef-row ef-ok"><span className="ef-dot">✓</span><span className="ef-label">Résumé</span><span className="ef-val">{result.resume.slice(0, 90)}…</span></div>}
                   {result.headline && <div className="ef-row ef-ok"><span className="ef-dot">✓</span><span className="ef-label">Titre</span><span className="ef-val">{result.headline}</span></div>}
                   {result.experiences?.length > 0 && <div className="ef-row ef-ok"><span className="ef-dot">✓</span><span className="ef-label">Expériences</span><span className="ef-val">{result.experiences.length} reformulée{result.experiences.length > 1 ? 's' : ''}</span></div>}
+                  {result.projets?.length > 0 && <div className="ef-row ef-ok"><span className="ef-dot">✓</span><span className="ef-label">Projets</span><span className="ef-val">{result.projets.length} reformulé{result.projets.length > 1 ? 's' : ''}</span></div>}
                   {result.competences?.length > 0 && <div className="ef-row ef-ok"><span className="ef-dot">✓</span><span className="ef-label">Compétences</span><span className="ef-val">réorganisées ({result.competences.length})</span></div>}
                 </div>
                 {result.missing_skills?.length > 0 && (

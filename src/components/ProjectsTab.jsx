@@ -97,7 +97,7 @@ export default function ProjectsTab({ items, onAdd, onUpdate, onRemove, onReorde
           </div>
 
           <div className="field">
-            <label className="field-label">Lien (GitHub, démo…) — optionnel</label>
+            <label className="field-label">Lien optionnel (GitHub, démo…)</label>
             <input
               type="text" className="field-input"
               placeholder="github.com/utilisateur/projet"

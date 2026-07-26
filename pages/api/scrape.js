@@ -89,7 +89,7 @@ export default async function handler(req, res) {
 
   if (text.length < 100) {
     return res.status(422).json({
-      error: 'Texte trop court extrait — cette page est peut-être dynamique (JS requis) ou protégée.',
+      error: 'Texte trop court extrait. Cette page est peut-être dynamique (JS requis) ou protégée.',
     })
   }
 

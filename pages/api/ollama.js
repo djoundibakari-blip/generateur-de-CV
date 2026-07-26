@@ -23,8 +23,53 @@ function extractJSON(content) {
   try { return JSON.parse(content) } catch { return null }
 }
 
+/* ── JSON Schema strict (structured outputs) ──
+   Tous les champs sont `required` : le decoding contraint de Groq garantit alors
+   qu'ils apparaissent tous dans la réponse (ex. le tableau "comparaison" qui
+   disparaissait parfois du JSON en simple prompt-engineering). */
+const str    = { type: 'string' }
+const strArr = { type: 'array', items: { type: 'string' } }
+const obj    = (properties) => ({ type: 'object', properties, required: Object.keys(properties), additionalProperties: false })
+const arrOf  = (properties) => ({ type: 'array', items: obj(properties) })
+
+const SCHEMA_PARSE = obj({
+  personal: obj({ prenom: str, nom: str, headline: str, email: str, telephone: str, resume: str, localisation: str, github: str }),
+  experiences: arrOf({ poste: str, entreprise: str, debut: str, fin: str, description: str }),
+  projets:     arrOf({ nom: str, technologies: str, lien: str, description: str }),
+  formations:  arrOf({ diplome: str, ecole: str, debut: str, fin: str }),
+  competences: arrOf({ nom: str, niveau: str }),
+  qualites:    arrOf({ nom: str }),
+  langues:     arrOf({ nom: str, niveau: str }),
+  passions:    arrOf({ nom: str }),
+})
+
+const SCHEMA_EXTRACT_JOB = obj({
+  poste: str, entreprise: str, secteur: str, contrat: str, localisation: str,
+  experience_requise: str, niveau_etudes: str,
+  stack_obligatoire: strArr, stack_souhaitee: strArr, soft_skills: strArr, missions_principales: strArr,
+})
+
+const SCHEMA_ANALYZE = obj({
+  score: { type: 'integer' },
+  points_forts: strArr, points_faibles: strArr, suggestions: strArr, sections_manquantes: strArr,
+})
+
+const SCHEMA_ADAPT = obj({
+  score: { type: 'integer' },
+  missing_skills: strArr,
+  headline: str, resume: str,
+  experiences: arrOf({ id: str, description: str }),
+  projets:     arrOf({ id: str, description: str }),
+  competences: arrOf({ id: str, nom: str, niveau: str }),
+  comparaison: arrOf({ exigence: str, present: { type: 'boolean' }, detail: str }),
+})
+
 /* ── Groq (cloud, OpenAI-compatible) ── */
-async function groqChat(messages, { numPredict, temperature = 0.15 }) {
+async function groqChat(messages, { numPredict, temperature = 0.15, schema, schemaName = 'response' }) {
+  /* Le mode strict (constrained decoding) n'est actuellement garanti par Groq
+     que pour les modèles gpt-oss. Pour les autres, on retombe sur json_object
+     (JSON valide garanti, mais pas le schéma exact). */
+  const isGptOss = GROQ_MODEL.startsWith('openai/gpt-oss')
   let res
   try {
     res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -38,9 +83,12 @@ async function groqChat(messages, { numPredict, temperature = 0.15 }) {
         messages,
         max_tokens:  numPredict,
         temperature,
+        response_format: (schema && isGptOss)
+          ? { type: 'json_schema', json_schema: { name: schemaName, strict: true, schema } }
+          : { type: 'json_object' },
         /* gpt-oss est un modèle "reasoning" : sans ça, son raisonnement interne
            peut fuiter dans le contenu et casser l'extraction JSON. */
-        ...(GROQ_MODEL.startsWith('openai/gpt-oss')
+        ...(isGptOss
           ? { reasoning_effort: 'low', include_reasoning: false }
           : {}),
       }),
@@ -56,8 +104,8 @@ async function groqChat(messages, { numPredict, temperature = 0.15 }) {
     if (err?.error?.code === 'rate_limit_exceeded') {
       const wait = err.error.message?.match(/try again in ([\d.]+)s/)?.[1]
       throw new AIError(429, wait
-        ? `Limite de débit de l'IA atteinte — réessayez dans ${Math.ceil(Number(wait))} secondes.`
-        : "Limite de débit de l'IA atteinte — réessayez dans quelques secondes.")
+        ? `Limite de débit de l'IA atteinte, réessayez dans ${Math.ceil(Number(wait))} secondes.`
+        : "Limite de débit de l'IA atteinte, réessayez dans quelques secondes.")
     }
     throw new AIError(502, "Le service IA a retourné une erreur. Réessayez dans un instant.")
   }
@@ -66,7 +114,7 @@ async function groqChat(messages, { numPredict, temperature = 0.15 }) {
 }
 
 /* ── Ollama (local) ── */
-async function ollamaChat(model, messages, { numPredict, numCtx, timeout, temperature = 0.15 }) {
+async function ollamaChat(model, messages, { numPredict, numCtx, timeout, temperature = 0.15, schema }) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeout * 1000)
   try {
@@ -75,6 +123,9 @@ async function ollamaChat(model, messages, { numPredict, numCtx, timeout, temper
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model, messages, stream: false, keep_alive: 0,
+        /* décodage contraint par grammaire : force la présence de tous les
+           champs du schéma même sur un petit modèle local. */
+        ...(schema ? { format: schema } : {}),
         options: { temperature, num_predict: numPredict, num_ctx: numCtx },
       }),
       signal: controller.signal,
@@ -181,7 +232,7 @@ Règles strictes :
       result = await callAI(model, [
         { role: 'system', content: system },
         { role: 'user',   content: `## TEXTE BRUT DU CV (peut être désordonné si PDF 2 colonnes)\n${cvText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"personal":{"prenom":"","nom":"","headline":"","email":"","telephone":"","resume":"","localisation":"","github":""},"experiences":[{"poste":"","entreprise":"","debut":"","fin":"","description":""}],"projets":[{"nom":"","technologies":"","lien":"","description":""}],"formations":[{"diplome":"","ecole":"","debut":"","fin":"","description":""}],"competences":[{"nom":"","niveau":""}],"qualites":[{"nom":""}],"langues":[{"nom":"","niveau":""}],"passions":[{"nom":""}]}` },
-      ], { numPredict: 2500, numCtx: 4096, timeout: 360, temperature: 0.1 })
+      ], { numPredict: 2500, numCtx: 4096, timeout: 360, temperature: 0.1, schema: SCHEMA_PARSE, schemaName: 'cv_parse' })
     } catch (e) {
       if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
       throw e
@@ -211,7 +262,7 @@ Règles strictes :
       result = await callAI(model, [
         { role: 'system', content: system },
         { role: 'user',   content: `## OFFRE D'EMPLOI\n${offerText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"poste":"","entreprise":"","secteur":"","contrat":"","localisation":"","experience_requise":"","niveau_etudes":"","stack_obligatoire":[],"stack_souhaitee":[],"soft_skills":[],"missions_principales":[]}` },
-      ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1 })
+      ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1, schema: SCHEMA_EXTRACT_JOB, schemaName: 'job_requirements' })
     } catch (e) {
       if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
       throw e
@@ -231,7 +282,7 @@ Règles strictes :
       result = await callAI(model, [
         { role: 'system', content: 'Tu es un expert RH senior et coach carrière.\nTu réponds UNIQUEMENT avec du JSON valide, sans markdown, sans texte avant ou après.' },
         { role: 'user',   content: `## CV À ANALYSER (JSON)\n${cvJson}\n\n## MISSION\n1. Score de qualité global (0–100) : clarté, exhaustivité, impact des descriptions, cohérence.\n2. 3 à 5 points forts (ce qui est bien fait).\n3. 3 à 5 points faibles ou axes d'amélioration concrets.\n4. 3 à 5 suggestions d'amélioration actionnables et précises.\n5. Sections importantes manquantes ou trop courtes.\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":68,"points_forts":[],"points_faibles":[],"suggestions":[],"sections_manquantes":[]}` },
-      ], { numPredict: 1500, numCtx: 3072, timeout: 300, temperature: 0.3 })
+      ], { numPredict: 1500, numCtx: 3072, timeout: 300, temperature: 0.3, schema: SCHEMA_ANALYZE, schemaName: 'cv_analysis' })
     } catch (e) {
       if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
       throw e
@@ -257,7 +308,7 @@ Règles strictes :
         jobRequirements = await callAI(model, [
           { role: 'system', content: 'Tu es un recruteur expert. JSON uniquement, sans markdown.' },
           { role: 'user',   content: `## OFFRE\n${offerText}\n\n## FORMAT JSON\n{"poste":"","stack_obligatoire":[],"stack_souhaitee":[],"soft_skills":[],"experience_requise":"","niveau_etudes":"","missions_principales":[]}` },
-        ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1 })
+        ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1, schema: SCHEMA_EXTRACT_JOB, schemaName: 'job_requirements' })
       } catch (e) {
         if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
         throw e
@@ -278,7 +329,7 @@ Tu réponds UNIQUEMENT avec du JSON valide, sans markdown, sans texte avant ou a
 RÈGLES ABSOLUES — HALLUCINATION INTERDITE :
 1. Ne JAMAIS inventer une expérience, un diplôme, une compétence ou une date absente du CV source
 2. Tu peux UNIQUEMENT : reformuler, réordonner, mettre en avant, adapter le vocabulaire
-3. Pour chaque expérience reformulée : même entreprise, mêmes dates, mêmes faits — seule la formulation change
+3. Pour chaque expérience ou projet reformulé : mêmes faits (entreprise, dates, techno, lien) — seule la formulation change
 4. Compétences absentes → missing_skills UNIQUEMENT, jamais ajoutées au CV
 5. Score honnête (0-100) basé sur la réelle correspondance, pas optimiste
 6. Utilise les mots-clés EXACTS de l'offre dans les reformulations quand c'est justifié`
@@ -287,8 +338,8 @@ RÈGLES ABSOLUES — HALLUCINATION INTERDITE :
     try {
       result = await callAI(model, [
         { role: 'system', content: system },
-        { role: 'user',   content: `## EXIGENCES DU POSTE (JSON — extrait par Agent 2)\n${exigencesJson}\n\n## CV DU CANDIDAT (JSON)\n${cvJson}\n\n## MISSION\n1. Réécris personal.resume : mets en avant les points qui matchent l'offre (max 500 car.).\n2. Adapte personal.headline au poste si pertinent, sinon conserve-le.\n3. Pour chaque expérience : reformule description avec les mots-clés du poste (garde les faits).\n4. Réordonne competences : stack_obligatoire en premier, puis stack_souhaitee, puis reste.\n5. Score de correspondance (0–100) honnête.\n6. Compétences du poste absentes du CV → missing_skills (max 8).\n7. Pour chaque item de stack_obligatoire, stack_souhaitee, soft_skills, experience_requise :\n   indique si couvert par le CV avec une courte explication.\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":72,"missing_skills":[],"headline":"","resume":"","experiences":[{"id":"ID_EXACT_DU_CV","description":""}],"competences":[{"id":"ID_EXACT_DU_CV","nom":"","niveau":""}],"comparaison":[{"exigence":"","present":true,"detail":""}]}` },
-      ], { numPredict: 2500, numCtx: 4096, timeout: 540, temperature: 0.2 })
+        { role: 'user',   content: `## EXIGENCES DU POSTE (JSON — extrait par Agent 2)\n${exigencesJson}\n\n## CV DU CANDIDAT (JSON)\n${cvJson}\n\n## MISSION\n1. Réécris personal.resume : mets en avant les points qui matchent l'offre (max 500 car.).\n2. Adapte personal.headline au poste si pertinent, sinon conserve-le.\n3. Pour chaque expérience : reformule description avec les mots-clés du poste (garde les faits).\n4. Pour chaque projet (projets) : reformule description avec les mots-clés du poste (garde les faits, la techno et le lien inchangés) — pour un profil étudiant/junior, les projets valent autant que les expériences, ne les néglige pas.\n5. Réordonne competences : stack_obligatoire en premier, puis stack_souhaitee, puis reste.\n6. Score de correspondance (0–100) honnête.\n7. Compétences du poste absentes du CV → missing_skills (max 8).\n8. "comparaison" est OBLIGATOIRE et NE DOIT JAMAIS être vide : crée une entrée pour CHAQUE item de stack_obligatoire, stack_souhaitee, soft_skills, et pour experience_requise (si non vide), en indiquant si le CV le couvre (present: true/false) avec une courte explication (detail).\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":72,"missing_skills":[],"headline":"","resume":"","experiences":[{"id":"ID_EXACT_DU_CV","description":""}],"projets":[{"id":"ID_EXACT_DU_CV","description":""}],"competences":[{"id":"ID_EXACT_DU_CV","nom":"","niveau":""}],"comparaison":[{"exigence":"","present":true,"detail":""}]}` },
+      ], { numPredict: 3000, numCtx: 4096, timeout: 540, temperature: 0.2, schema: SCHEMA_ADAPT, schemaName: 'cv_adaptation' })
     } catch (e) {
       if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
       throw e

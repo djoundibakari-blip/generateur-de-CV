@@ -7,13 +7,13 @@ const FEATURES = [
   { num: '02', title: 'Adaptation par IA', desc: "Adaptez votre CV à chaque offre en un clic : score de correspondance, compétences manquantes, reformulation." },
   { num: '03', title: 'Lettre de motivation', desc: "Générée à partir de votre CV et de l'offre visée, prête à personnaliser (offre Premium)." },
   { num: '04', title: 'Export PDF fidèle', desc: 'Génération serveur pour une mise en page parfaite, pixel perfect, prête à envoyer.' },
-  { num: '05', title: 'Aperçu temps réel', desc: 'Chaque frappe met à jour le CV instantanément — pas besoin de recharger la page.' },
+  { num: '05', title: 'Aperçu temps réel', desc: "Chaque frappe met à jour le CV instantanément, sans avoir à recharger la page." },
   { num: '06', title: 'Multilingue', desc: 'Détecte les CV en français et en anglais, et adapte les sections automatiquement.' },
 ]
 
 const STEPS = [
-  { num: '01', title: 'Importez votre CV', desc: "Glissez un fichier PDF, DOCX, PNG ou TXT — l'OCR extrait automatiquement toutes vos informations." },
-  { num: '02', title: 'Personnalisez-le', desc: "Vérifiez et ajustez vos informations dans le formulaire — l'aperçu se met à jour en temps réel." },
+  { num: '01', title: 'Importez votre CV', desc: "Glissez un fichier PDF, DOCX, PNG ou TXT : l'OCR extrait automatiquement toutes vos informations." },
+  { num: '02', title: 'Personnalisez-le', desc: "Vérifiez et ajustez vos informations dans le formulaire, l'aperçu se met à jour en temps réel." },
   { num: '03', title: "Adaptez-le à l'offre", desc: "Collez une offre d'emploi : l'IA optimise votre résumé, vos compétences et vos expériences pour le poste visé." },
   { num: '04', title: 'Exportez en PDF', desc: 'Téléchargez votre CV au format PDF, prêt à envoyer à vos recruteurs.' },
 ]

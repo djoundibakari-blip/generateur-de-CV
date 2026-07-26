@@ -30,7 +30,7 @@ export default function CheckoutSimulationModal({ planKey, onClose }) {
               <span className="auth-prompt-icon">💳</span>
               <h2 className="auth-prompt-title">Simulation de paiement</h2>
               <p className="auth-prompt-desc">
-                Aucun paiement réel n'est effectué (phase de test — Stripe n'est pas encore branché).
+                Aucun paiement réel n'est effectué (phase de test, Stripe n'est pas encore branché).
                 Confirmez pour passer au plan <strong>{plan.name}</strong> ({(plan.priceMonthly / 100).toFixed(0)}€/mois,
                 {' '}{plan.monthlyCredits} crédits IA) et débloquer ses fonctionnalités immédiatement.
               </p>
@@ -46,7 +46,7 @@ export default function CheckoutSimulationModal({ planKey, onClose }) {
               <span className="auth-prompt-icon">✅</span>
               <h2 className="auth-prompt-title">Plan {plan.name} activé</h2>
               <p className="auth-prompt-desc">
-                Simulation réussie — votre compte a maintenant accès aux fonctionnalités du plan {plan.name}.
+                Simulation réussie : votre compte a maintenant accès aux fonctionnalités du plan {plan.name}.
               </p>
               <div className="auth-prompt-actions">
                 <button className="auth-prompt-btn-primary" onClick={onClose}>Fermer</button>

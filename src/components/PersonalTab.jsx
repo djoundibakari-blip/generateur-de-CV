@@ -27,7 +27,7 @@ export default function PersonalTab({ data, onChange }) {
           <button type="button" className="photo-btn" onClick={() => fileRef.current.click()}>
             {data.photoUrl ? 'Changer la photo' : 'Ajouter une photo'}
           </button>
-          <span className="photo-hint">JPG, PNG — max 2 Mo</span>
+          <span className="photo-hint">JPG, PNG, max 2 Mo</span>
         </div>
         <input
           ref={fileRef} type="file" accept="image/*"
