@@ -83,6 +83,10 @@ export default function App() {
         const adapted = (aiResult.experiences || []).find(e => e.id === exp.id)
         return adapted?.description ? { ...exp, description: adapted.description } : exp
       }),
+      projets: prev.projets.map(projet => {
+        const adapted = (aiResult.projets || []).find(p => p.id === projet.id)
+        return adapted?.description ? { ...projet, description: adapted.description } : projet
+      }),
       competences: (() => {
         if (!aiResult.competences?.length) return prev.competences
         return aiResult.competences.map(c => {
