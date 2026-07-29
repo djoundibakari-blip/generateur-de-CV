@@ -9,12 +9,13 @@ import SkillsTab from './components/SkillsTab.jsx'
 import CVPreview from './components/CVPreview.jsx'
 import ImportModal from './components/ImportModal.jsx'
 import AdaptModal from './components/AdaptModal.jsx'
+import CoverLetterModal from './components/CoverLetterModal.jsx'
 import AccountMenu from './components/AccountMenu.jsx'
 import AuthPrompt from './components/AuthPrompt.jsx'
 import LoginModal from './components/LoginModal.jsx'
 import { usePlan } from './context/PlanContext.jsx'
 import { FEATURES } from '../lib/plans.js'
-import { SparklesIcon, UndoIcon, LockIcon } from './components/icons.jsx'
+import { SparklesIcon, UndoIcon, LockIcon, FileTextIcon } from './components/icons.jsx'
 
 const AUTH_PROMPT_KEY = 'cv_auth_prompt_dismissed'
 
@@ -43,6 +44,7 @@ export default function App() {
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
   const [adapting, setAdapting]   = useState(false)
+  const [writingLetter, setWritingLetter] = useState(false)
   const [prevCv, setPrevCv]       = useState(null)
   const [loginPrompt, setLoginPrompt] = useState(false)
 
@@ -56,8 +58,9 @@ export default function App() {
     setAuthPromptDismissed(true)
   }
 
-  const canImport = can(FEATURES.IMPORT_CV)
-  const canAdapt  = can(FEATURES.AI_ADAPT)
+  const canImport      = can(FEATURES.IMPORT_CV)
+  const canAdapt       = can(FEATURES.AI_ADAPT)
+  const canCoverLetter = can(FEATURES.COVER_LETTER)
 
   const handleImportClick = () => {
     if (!canImport) { setLoginPrompt(true); return }
@@ -66,6 +69,10 @@ export default function App() {
   const handleAdaptClick = () => {
     if (!canAdapt) { setLoginPrompt(true); return }
     setAdapting(true)
+  }
+  const handleCoverLetterClick = () => {
+    if (!canCoverLetter) { setLoginPrompt(true); return }
+    setWritingLetter(true)
   }
 
   const handleImport = (parsed) => { setCv(parsed); setTab('personal') }
@@ -218,6 +225,13 @@ export default function App() {
         />
       )}
 
+      {writingLetter && (
+        <CoverLetterModal
+          cv={cv}
+          onClose={() => setWritingLetter(false)}
+        />
+      )}
+
       <header className="app-header">
         <div className="header-brand">
           <div className="brand-icon">CV</div>
@@ -235,6 +249,10 @@ export default function App() {
           <button className={`btn-adapt${canAdapt ? '' : ' btn-locked'}`} onClick={handleAdaptClick}>
             {canAdapt ? <SparklesIcon size={14} strokeWidth={2} /> : <LockIcon size={13} strokeWidth={2} />}
             Adapter au poste
+          </button>
+          <button className={`btn-import${canCoverLetter ? '' : ' btn-locked'}`} onClick={handleCoverLetterClick}>
+            {canCoverLetter ? <FileTextIcon size={14} strokeWidth={1.8} /> : <LockIcon size={13} strokeWidth={2} />}
+            Lettre de motivation
           </button>
           {prevCv && (
             <button className="btn-undo" onClick={() => { setCv(prevCv); setPrevCv(null) }} title="Annuler l'adaptation IA">

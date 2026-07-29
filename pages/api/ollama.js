@@ -64,6 +64,8 @@ const SCHEMA_ADAPT = obj({
   comparaison: arrOf({ exigence: str, present: { type: 'boolean' }, detail: str }),
 })
 
+const SCHEMA_COVER_LETTER = obj({ lettre: str })
+
 /* ── Groq (cloud, OpenAI-compatible) ── */
 async function groqChat(messages, { numPredict, temperature = 0.15, schema, schemaName = 'response' }) {
   /* Le mode strict (constrained decoding) n'est actuellement garanti par Groq
@@ -340,6 +342,40 @@ RÈGLES ABSOLUES — HALLUCINATION INTERDITE :
         { role: 'system', content: system },
         { role: 'user',   content: `## EXIGENCES DU POSTE (JSON — extrait par Agent 2)\n${exigencesJson}\n\n## CV DU CANDIDAT (JSON)\n${cvJson}\n\n## MISSION\n1. Réécris personal.resume : mets en avant les points qui matchent l'offre (max 500 car.).\n2. Adapte personal.headline au poste si pertinent, sinon conserve-le.\n3. Pour chaque expérience : reformule description avec les mots-clés du poste (garde les faits).\n4. Pour chaque projet (projets) : reformule description avec les mots-clés du poste (garde les faits, la techno et le lien inchangés) — pour un profil étudiant/junior, les projets valent autant que les expériences, ne les néglige pas.\n5. Réordonne competences : stack_obligatoire en premier, puis stack_souhaitee, puis reste.\n6. Score de correspondance (0–100) honnête.\n7. Compétences du poste absentes du CV → missing_skills (max 8).\n8. "comparaison" est OBLIGATOIRE et NE DOIT JAMAIS être vide : crée une entrée pour CHAQUE item de stack_obligatoire, stack_souhaitee, soft_skills, et pour experience_requise (si non vide), en indiquant si le CV le couvre (present: true/false) avec une courte explication (detail).\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":72,"missing_skills":[],"headline":"","resume":"","experiences":[{"id":"ID_EXACT_DU_CV","description":""}],"projets":[{"id":"ID_EXACT_DU_CV","description":""}],"competences":[{"id":"ID_EXACT_DU_CV","nom":"","niveau":""}],"comparaison":[{"exigence":"","present":true,"detail":""}]}` },
       ], { numPredict: 3000, numCtx: 4096, timeout: 540, temperature: 0.2, schema: SCHEMA_ADAPT, schemaName: 'cv_adaptation' })
+    } catch (e) {
+      if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+      throw e
+    }
+
+    if (!result) return res.status(502).json({ error: "Réponse de l'IA illisible (JSON invalide). Réessayez." })
+    return res.json(result)
+  }
+
+  /* ── AGENT 4 (Premium) — cover_letter : CV + offre → lettre de motivation ── */
+  if (action === 'cover_letter') {
+    const offerText = (body.jobOffer ?? '').trim().slice(0, 3000)
+    if (offerText.length < 20) return res.status(400).json({ error: "Texte de l'offre trop court." })
+
+    const cvSlim = slimCV(cv)
+    const cvJson = JSON.stringify(cvSlim, null, 2)
+
+    const system = `Tu es un expert en rédaction de lettres de motivation professionnelles en français.
+Tu réponds UNIQUEMENT avec du JSON valide, sans markdown, sans texte avant ou après.
+
+RÈGLES ABSOLUES — HALLUCINATION INTERDITE :
+1. Ne JAMAIS inventer une expérience, un diplôme, une compétence ou une date absente du CV source
+2. Base-toi uniquement sur les informations du CV fourni et de l'offre d'emploi
+3. Ton professionnel, concis, sans formules toutes faites répétitives ("passionné depuis toujours", etc.)
+4. Structure : accroche, motivation pour le poste, 2 à 3 points de correspondance CV/offre avec exemples concrets tirés du CV, formule de politesse
+5. Longueur 250 à 400 mots, en paragraphes séparés par des sauts de ligne doubles (\\n\\n)
+6. N'invente pas de nom d'entreprise ou de destinataire absent de l'offre : utilise "Madame, Monsieur" par défaut`
+
+    let result
+    try {
+      result = await callAI(model, [
+        { role: 'system', content: system },
+        { role: 'user',   content: `## OFFRE D'EMPLOI\n${offerText}\n\n## CV DU CANDIDAT (JSON)\n${cvJson}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"lettre":""}` },
+      ], { numPredict: 1400, numCtx: 3072, timeout: 300, temperature: 0.35, schema: SCHEMA_COVER_LETTER, schemaName: 'cover_letter' })
     } catch (e) {
       if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
       throw e
