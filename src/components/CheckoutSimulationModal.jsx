@@ -31,7 +31,7 @@ export default function CheckoutSimulationModal({ planKey, onClose }) {
               <h2 className="auth-prompt-title">Simulation de paiement</h2>
               <p className="auth-prompt-desc">
                 Aucun paiement réel n'est effectué (phase de test, Stripe n'est pas encore branché).
-                Confirmez pour passer au plan <strong>{plan.name}</strong> ({(plan.priceMonthly / 100).toFixed(0)}€/mois,
+                Confirmez pour passer au plan <strong>{plan.name}</strong> ({(plan.priceMonthly / 100).toFixed(0)}€/{plan.billingPeriod === 'quarterly' ? 'trimestre' : 'mois'},
                 {' '}{plan.monthlyCredits} crédits IA) et débloquer ses fonctionnalités immédiatement.
               </p>
               <div className="auth-prompt-actions">

@@ -42,10 +42,12 @@ export default function PricingSection({ onStart }) {
                 <p className="pricing-tagline">{plan.tagline}</p>
                 <div className="pricing-price">
                   <span className="pricing-price-num">{formatPrice(plan.priceMonthly)}</span>
-                  <span className="pricing-price-period">/mois</span>
+                  <span className="pricing-price-period">/{plan.billingPeriod === 'quarterly' ? 'trimestre' : 'mois'}</span>
                 </div>
                 <p className="pricing-credits">
-                  {plan.monthlyCredits > 0 ? `${plan.monthlyCredits} crédits IA / mois` : 'Sans IA'}
+                  {plan.monthlyCredits > 0
+                    ? `${plan.monthlyCredits} crédits IA / ${plan.billingPeriod === 'quarterly' ? 'trimestre' : 'mois'}`
+                    : 'Sans IA'}
                 </p>
 
                 <ul className="pricing-features">

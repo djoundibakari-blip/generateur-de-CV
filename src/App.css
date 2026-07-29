@@ -512,21 +512,24 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 .preview-sticky { position: sticky; top: 88px; }
 
 /* ─── CV Paper ───────────────────────────────────────────────────────── */
+/* Format A4 strict (21 x 29.7 cm) : ratio fixé via aspect-ratio pour rester
+   correct à toute largeur, plutôt qu'une hauteur en dur qui dérive du ratio réel. */
 .cv-paper {
   background: white;
   border-radius: 6px;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
-  min-height: 780px;
+  width: 100%;
   max-width: 620px;
+  aspect-ratio: 21 / 29.7;
   margin: 0 auto;
   font-family: 'Inter', Arial, sans-serif;
 }
 
 .cv-body {
   display: grid;
-  grid-template-columns: 200px 1fr;
-  min-height: 780px;
+  grid-template-columns: 31% 69%; /* même ratio sidebar/contenu que le PDF exporté (cvTemplate.js) */
+  height: 100%;
 }
 
 /* ── Sidebar bleue ─── */
@@ -650,7 +653,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 /* Placeholder */
 .cv-placeholder {
   display: flex; flex-direction: column; align-items: center;
-  justify-content: center; min-height: 600px;
+  justify-content: center; height: 100%;
   color: #9CA3AF; text-align: center; gap: 10px;
 }
 .cv-placeholder-icon { display: flex; opacity: .6; }
@@ -661,7 +664,6 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   .app-body { grid-template-columns: 1fr; padding: 16px; }
   .form-panel  { position: static; max-height: none; }
   .preview-sticky { position: static; }
-  .cv-body { grid-template-columns: 190px 1fr; }
 }
 
 @media (max-width: 640px) {
@@ -669,8 +671,9 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   .brand-name { display: none; }
   .tab-btn .tab-label { display: none; }
   .tab-btn { padding: 14px 6px; }
-  .cv-body { grid-template-columns: 1fr; }
-  .cv-sidebar { padding: 16px 14px; }
+  /* La feuille garde ses proportions A4 (deux colonnes) à toute taille d'écran :
+     pas d'empilement sidebar/contenu, seul le padding interne se resserre. */
+  .cv-sidebar { padding: 16px 10px; }
 }
 
 /* ─── Import Modal ───────────────────────────────────────────────────── */
