@@ -5,7 +5,11 @@ import { ACTION_FEATURE_MAP } from '@/lib/plans'
 
 const OLLAMA       = process.env.OLLAMA_URL   || 'http://localhost:11434'
 const GROQ_API_KEY = process.env.GROQ_API_KEY || ''
-const GROQ_MODEL   = process.env.GROQ_MODEL   || 'openai/gpt-oss-120b'
+/* llama-3.1-8b-instant : quotas gratuits Groq bien plus larges que les modèles
+   "raisonnement" (gpt-oss-120b épuisait le quota TPM dès le 1er appel Agent 3).
+   Contrepartie : le JSON schema strict (isGptOss ci-dessous) n'est pas garanti
+   sur ce modèle, on retombe sur json_object (JSON valide, champs non garantis). */
+const GROQ_MODEL   = process.env.GROQ_MODEL   || 'llama-3.1-8b-instant'
 
 /* Erreur IA typée : permet aux handlers de renvoyer le vrai motif d'échec
    (rate limit, panne réseau...) au lieu d'un message générique. */
