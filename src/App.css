@@ -225,7 +225,7 @@ body {
   display: flex; align-items: center; justify-content: space-between;
 }
 
-.header-brand { display: flex; align-items: center; gap: 10px; }
+.header-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 
 .brand-icon {
   width: 30px; height: 30px; flex-shrink: 0;
@@ -314,7 +314,7 @@ body {
 .tab-btn:hover  { color: var(--primary); background: var(--primary-soft); }
 .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-.tab-icon { font-size: 17px; }
+.tab-icon { display: flex; }
 
 .tab-dot {
   position: absolute; top: 9px; right: 9px;
@@ -395,7 +395,8 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 14px;
 }
-.section-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.section-title { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--text); }
+.section-title svg { flex-shrink: 0; color: var(--primary); }
 .section-count {
   font-size: 11px; font-weight: 600; color: var(--text-muted);
   background: var(--bg); border: 1px solid var(--border); padding: 2px 8px;
@@ -461,7 +462,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 .empty-state {
   text-align: center; padding: 28px 16px; color: var(--text-muted);
 }
-.empty-icon { font-size: 32px; margin-bottom: 8px; }
+.empty-icon { display: flex; justify-content: center; margin-bottom: 8px; color: var(--text-muted); }
 .empty-msg { font-size: 13px; line-height: 1.5; }
 
 /* Level badges */
@@ -652,7 +653,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   justify-content: center; min-height: 600px;
   color: #9CA3AF; text-align: center; gap: 10px;
 }
-.cv-placeholder-icon { font-size: 52px; }
+.cv-placeholder-icon { display: flex; opacity: .6; }
 .cv-placeholder-text { font-size: 15px; max-width: 220px; line-height: 1.5; }
 
 /* ─── Responsive ─────────────────────────────────────────────────────── */
@@ -707,7 +708,11 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   flex-shrink: 0;
 }
 .modal-head-left { display: flex; align-items: center; gap: 14px; }
-.modal-icon { font-size: 28px; }
+.modal-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 12px;
+  background: var(--primary-soft); color: var(--primary); flex-shrink: 0;
+}
 .modal-title { font-size: 16px; font-weight: 700; color: var(--text); }
 .modal-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
@@ -761,7 +766,14 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 }
 .dropzone-link { color: var(--primary); text-decoration: underline; text-decoration-style: dotted; }
 .dropzone-hint { font-size: 11px; color: var(--text-muted); }
-.dropzone-spinner { font-size: 22px; }
+
+/* Shared rotating loader (replaces the old emoji spinners) */
+.ui-spinner {
+  display: inline-block; flex-shrink: 0; border-radius: 50%;
+  border: 2px solid rgba(155,89,182,.25); border-top-color: var(--primary);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* Divider with text */
 .modal-divider {
@@ -817,7 +829,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 .btn-secondary:hover { color: var(--text); border-color: var(--text-muted); }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   ADAPT MODAL — ✨ Adapter au poste
+   ADAPT MODAL — Adapter au poste
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Header buttons */
@@ -831,6 +843,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   transition: all var(--ease);
 }
 .btn-adapt:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn-adapt svg { flex-shrink: 0; }
 
 .btn-undo {
   display: flex; align-items: center; gap: 6px;
@@ -841,6 +854,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   transition: all var(--ease);
 }
 .btn-undo:hover { background: rgba(224,92,92,.2); border-color: #E05C5C; color: #E05C5C; }
+.btn-undo svg { flex-shrink: 0; }
 
 /* Ollama error banner */
 .adapt-ollama-error {
@@ -861,6 +875,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   border-radius: var(--r-s); padding: 10px 14px;
 }
 .adapt-model-label {
+  display: inline-flex; align-items: center; gap: 5px;
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: .6px; color: var(--text-muted); white-space: nowrap;
 }
@@ -872,14 +887,6 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
 .adapt-model-select option { background: #0F0E16; }
 .adapt-model-placeholder { font-size: 13px; color: var(--text-muted); }
 
-/* Spinning gear icon in loading dropzone */
-.adapt-spin-icon {
-  font-size: 26px; opacity: .7;
-  display: inline-block;
-  animation: spin 2s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
 /* ── Mode toggle (Analyser / Adapter) ── */
 .adapt-mode-toggle {
   display: flex; gap: 0;
@@ -887,6 +894,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   padding: 0 24px;
 }
 .adapt-mode-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   flex: 1; background: none; border: none; border-bottom: 2px solid transparent;
   color: var(--text-muted); font-size: 13px; font-weight: 600; font-family: var(--font);
   padding: 12px 8px; cursor: pointer; transition: all var(--ease);
@@ -990,7 +998,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
   font-size: 12px; color: #E07070; padding: 4px 2px;
   display: flex; align-items: center; gap: 6px;
 }
-.adapt-url-error::before { content: '⚠'; }
+.adapt-url-error svg { flex-shrink: 0; }
 
 /* ═══════════════════════════════════════════════════════════════════════
    PRICING

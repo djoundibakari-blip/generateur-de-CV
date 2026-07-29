@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { RocketIcon } from './icons.jsx'
 
 const TrashIcon = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -49,7 +50,7 @@ export default function ProjectsTab({ items, onAdd, onUpdate, onRemove, onReorde
 
       {items.length === 0 && (
         <div className="empty-state">
-          <div className="empty-icon">🚀</div>
+          <div className="empty-icon"><RocketIcon size={28} strokeWidth={1.6} /></div>
           <p className="empty-msg">Aucun projet ajouté.<br />Cliquez ci-dessous pour commencer.</p>
         </div>
       )}

@@ -1,3 +1,5 @@
+import { ZapIcon, SparklesIcon, GlobeIcon, HeartIcon } from './icons.jsx'
+
 const TrashIcon = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
@@ -6,11 +8,11 @@ const TrashIcon = () => (
 
 const SKILL_LEVELS = ['Débutant', 'Intermédiaire', 'Avancé', 'Expert']
 
-function SimpleListSection({ title, icon, items, onAdd, onUpdate, onRemove, addLabel, placeholder, emptyMsg }) {
+function SimpleListSection({ title, icon: Icon, items, onAdd, onUpdate, onRemove, addLabel, placeholder, emptyMsg }) {
   return (
     <div className="skills-section">
       <div className="section-header">
-        <span className="section-title">{icon} {title}</span>
+        <span className="section-title"><Icon size={13} strokeWidth={2} /> {title}</span>
         {items.length > 0 && <span className="section-count">{items.length}</span>}
       </div>
       {items.map((item, idx) => (
@@ -47,12 +49,12 @@ export default function SkillsTab({
       {/* ── Compétences techniques ── */}
       <div className="skills-section">
         <div className="section-header">
-          <span className="section-title">⚡ Compétences</span>
+          <span className="section-title"><ZapIcon size={13} strokeWidth={2} /> Compétences</span>
           {items.length > 0 && <span className="section-count">{items.length}</span>}
         </div>
         {items.length === 0 && (
           <div className="empty-state">
-            <div className="empty-icon">⚡</div>
+            <div className="empty-icon"><ZapIcon size={28} strokeWidth={1.6} /></div>
             <p className="empty-msg">Aucune compétence.<br/>Ajoutez vos technologies.</p>
           </div>
         )}
@@ -95,7 +97,7 @@ export default function SkillsTab({
 
       {/* ── Qualités ── */}
       <SimpleListSection
-        title="Qualités" icon="✨"
+        title="Qualités" icon={SparklesIcon}
         items={qualites} onAdd={onAddQual} onUpdate={onUpdateQual} onRemove={onRemoveQual}
         addLabel="Ajouter une qualité"
         placeholder="ex : Autonome, Rigoureux…"
@@ -107,7 +109,7 @@ export default function SkillsTab({
       {/* ── Langues ── */}
       <div className="skills-section">
         <div className="section-header">
-          <span className="section-title">🌍 Langues</span>
+          <span className="section-title"><GlobeIcon size={13} strokeWidth={2} /> Langues</span>
           {langues.length > 0 && <span className="section-count">{langues.length}</span>}
         </div>
         {langues.length === 0 && (
@@ -143,7 +145,7 @@ export default function SkillsTab({
 
       {/* ── Passions ── */}
       <SimpleListSection
-        title="Passions" icon="❤️"
+        title="Passions" icon={HeartIcon}
         items={passions} onAdd={onAddPass} onUpdate={onUpdatePass} onRemove={onRemovePass}
         addLabel="Ajouter une passion"
         placeholder="ex : Mangas, Jeux vidéo…"

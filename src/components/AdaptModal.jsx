@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { extractTextFromFile } from '../utils/extractCV.js'
+import { SearchIcon, SparklesIcon, ZapIcon, AlertTriangleIcon, Spinner } from './icons.jsx'
 
 export default function AdaptModal({ cv, onApply, onClose }) {
   const [mode, setMode]         = useState('analyze') // 'analyze' | 'adapt'
@@ -162,7 +163,9 @@ export default function AdaptModal({ cv, onApply, onClose }) {
         {/* ── Header ── */}
         <div className="modal-head">
           <div className="modal-head-left">
-            <span className="modal-icon">{mode === 'analyze' ? '🔍' : '✨'}</span>
+            <span className="modal-icon">
+              {mode === 'analyze' ? <SearchIcon size={22} strokeWidth={1.8} /> : <SparklesIcon size={22} strokeWidth={1.6} />}
+            </span>
             <div>
               <div className="modal-title">{mode === 'analyze' ? 'Analyser mon CV' : 'Adapter au poste'}</div>
               <div className="modal-sub">{mode === 'analyze' ? 'L\'IA évalue la qualité de votre CV' : 'L\'IA optimise votre CV pour l\'offre'}</div>
@@ -179,10 +182,10 @@ export default function AdaptModal({ cv, onApply, onClose }) {
         {phase === 'input' && (
           <div className="adapt-mode-toggle">
             <button className={`adapt-mode-btn${mode === 'analyze' ? ' active' : ''}`} onClick={() => switchMode('analyze')}>
-              🔍 Analyser mon CV
+              <SearchIcon size={13} strokeWidth={2} /> Analyser mon CV
             </button>
             <button className={`adapt-mode-btn${mode === 'adapt' ? ' active' : ''}`} onClick={() => switchMode('adapt')}>
-              ✨ Adapter au poste
+              <SparklesIcon size={13} strokeWidth={1.8} /> Adapter au poste
             </button>
           </div>
         )}
@@ -208,7 +211,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
                 borderRadius: 8, padding: '10px 14px', fontSize: 13,
                 display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 4,
               }}>
-                <span>⚠️</span>
+                <AlertTriangleIcon size={15} strokeWidth={2} style={{ flexShrink: 0, marginTop: 1 }} />
                 <div>
                   <strong style={{ color: '#E0C05C' }}>CV vide détecté</strong>
                   <div style={{ color: 'var(--text-muted)', marginTop: 2 }}>
@@ -224,7 +227,9 @@ export default function AdaptModal({ cv, onApply, onClose }) {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {mode === 'adapt' && (
                   <div className="adapt-model-field" style={{ flex: 1, minWidth: 160 }}>
-                    <span className="adapt-model-label" title="Agent 2 : Extraction offre (rapide)">⚡ Extraction</span>
+                    <span className="adapt-model-label" title="Agent 2 : Extraction offre (rapide)">
+                      <ZapIcon size={12} strokeWidth={2} /> Extraction
+                    </span>
                     <select className="adapt-model-select" value={extractModel} onChange={e => setExtractModel(e.target.value)}>
                       {models.map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
@@ -232,7 +237,9 @@ export default function AdaptModal({ cv, onApply, onClose }) {
                 )}
                 <div className="adapt-model-field" style={{ flex: 1, minWidth: 160 }}>
                   <span className="adapt-model-label" title={mode === 'adapt' ? 'Agent 3 : Adaptation CV (précis)' : 'Analyse qualité'}>
-                    {mode === 'adapt' ? '✨ Adaptation' : '🔍 Analyse'}
+                    {mode === 'adapt'
+                      ? <><SparklesIcon size={12} strokeWidth={1.8} /> Adaptation</>
+                      : <><SearchIcon size={12} strokeWidth={2} /> Analyse</>}
                   </span>
                   <select className="adapt-model-select" value={adaptModel} onChange={e => setAdaptModel(e.target.value)}>
                     {models.map(m => <option key={m} value={m}>{m}</option>)}
@@ -281,7 +288,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
                     {urlLoading ? 'Chargement…' : 'Récupérer'}
                   </button>
                 </div>
-                {urlError && <p className="adapt-url-error">{urlError}</p>}
+                {urlError && <p className="adapt-url-error"><AlertTriangleIcon size={13} strokeWidth={2} />{urlError}</p>}
 
                 <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.webp" style={{ display: 'none' }} onChange={e => handleFile(e.target.files[0])} />
                 <div
@@ -293,7 +300,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
                 >
                   {phase === 'extracting' ? (
                     <div className="dropzone-inner">
-                      <span className="dropzone-spinner">⏳</span>
+                      <Spinner size={22} />
                       <div>
                         <div className="dropzone-title">{extractMsg}</div>
                         <div className="dropzone-hint">Cela peut prendre quelques secondes…</div>
@@ -353,7 +360,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
           <div className="modal-body">
             <div className="file-dropzone" style={{ cursor: 'default', minHeight: 110 }}>
               <div className="dropzone-inner">
-                <span className="adapt-spin-icon">⚙</span>
+                <Spinner size={22} />
                 <div>
                   <div className="dropzone-title">Agent 2 : Analyse de l'offre…</div>
                   <div className="dropzone-hint">Modèle : <strong>{extractModel}</strong> (extraction des exigences)</div>
@@ -382,7 +389,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
           <div className="modal-body">
             <div className="file-dropzone" style={{ cursor: 'default', borderColor: 'rgba(100,90,200,.4)', minHeight: 110 }}>
               <div className="dropzone-inner">
-                <span className="adapt-spin-icon">⚙</span>
+                <Spinner size={22} />
                 <div>
                   <div className="dropzone-title">Agent 3 : Adaptation du CV…</div>
                   <div className="dropzone-hint">Modèle : <strong>{adaptModel}</strong> (reformulation ciblée)</div>
@@ -411,7 +418,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
           <div className="modal-body">
             <div className="file-dropzone" style={{ cursor: 'default', minHeight: 110 }}>
               <div className="dropzone-inner">
-                <span className="adapt-spin-icon">⚙</span>
+                <Spinner size={22} />
                 <div>
                   <div className="dropzone-title">L'IA analyse votre CV…</div>
                   <div className="dropzone-hint">Modèle : <strong>{adaptModel}</strong> (30 à 90 secondes)</div>
@@ -588,7 +595,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
           <div className="modal-body">
             <div className="file-dropzone" style={{ cursor: 'default', borderColor: 'rgba(224,92,92,.4)' }}>
               <div className="dropzone-inner">
-                <span style={{ fontSize: 28 }}>⚠</span>
+                <AlertTriangleIcon size={26} strokeWidth={1.6} style={{ color: '#E07070', flexShrink: 0 }} />
                 <div>
                   <div className="dropzone-title" style={{ color: '#E07070' }}>Erreur</div>
                   <div className="dropzone-hint">{errMsg}</div>

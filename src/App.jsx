@@ -14,6 +14,7 @@ import AuthPrompt from './components/AuthPrompt.jsx'
 import LoginModal from './components/LoginModal.jsx'
 import { usePlan } from './context/PlanContext.jsx'
 import { FEATURES } from '../lib/plans.js'
+import { SparklesIcon, UndoIcon, LockIcon } from './components/icons.jsx'
 
 const AUTH_PROMPT_KEY = 'cv_auth_prompt_dismissed'
 
@@ -228,15 +229,17 @@ export default function App() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
               </svg>
-            ) : '🔒'}
+            ) : <LockIcon size={13} strokeWidth={2} />}
             Importer un CV
           </button>
           <button className={`btn-adapt${canAdapt ? '' : ' btn-locked'}`} onClick={handleAdaptClick}>
-            {canAdapt ? '✨' : '🔒'} Adapter au poste
+            {canAdapt ? <SparklesIcon size={14} strokeWidth={2} /> : <LockIcon size={13} strokeWidth={2} />}
+            Adapter au poste
           </button>
           {prevCv && (
             <button className="btn-undo" onClick={() => { setCv(prevCv); setPrevCv(null) }} title="Annuler l'adaptation IA">
-              ↩ Annuler l'IA
+              <UndoIcon size={13} />
+              Annuler l'IA
             </button>
           )}
           <button className="btn-export" onClick={exportPDF} disabled={exporting}>

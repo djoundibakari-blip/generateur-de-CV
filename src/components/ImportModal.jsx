@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { parseCV } from '../utils/parseCV.js'
 import { extractTextFromFile } from '../utils/extractCV.js'
+import { FileTextIcon, SparklesIcon, AlertTriangleIcon, Spinner } from './icons.jsx'
 
 function Field({ label, value }) {
   const ok = Boolean(value)
@@ -144,7 +145,7 @@ export default function ImportModal({ onClose, onApply }) {
         {/* Header */}
         <div className="modal-head">
           <div className="modal-head-left">
-            <span className="modal-icon">📄</span>
+            <span className="modal-icon"><FileTextIcon size={22} strokeWidth={1.6} /></span>
             <div>
               <div className="modal-title">Importer un CV existant</div>
               <div className="modal-sub">Le contenu sera extrait et adapté au modèle</div>
@@ -178,7 +179,7 @@ export default function ImportModal({ onClose, onApply }) {
               />
               {loading ? (
                 <div className="dropzone-inner">
-                  <span className="dropzone-spinner">⏳</span>
+                  <Spinner size={22} />
                   <div>
                     <div className="dropzone-title">{loadingMsg}</div>
                     <div className="dropzone-hint">Cela peut prendre quelques secondes…</div>
@@ -208,7 +209,9 @@ export default function ImportModal({ onClose, onApply }) {
                 border: `1px solid ${text.length > 800 ? 'rgba(92,224,138,.3)' : 'rgba(224,192,92,.3)'}`,
                 color: 'var(--text-muted)',
               }}>
-                <span>{text.length > 800 ? '✓' : '⚠'}</span>
+                {text.length > 800
+                  ? <span>✓</span>
+                  : <AlertTriangleIcon size={13} strokeWidth={2} style={{ flexShrink: 0 }} />}
                 <span>
                   <strong>{text.length} caractères</strong> extraits :{' '}
                   {text.length > 800
@@ -244,14 +247,14 @@ export default function ImportModal({ onClose, onApply }) {
                 borderRadius: 6, padding: '8px 12px', fontSize: 12,
                 display: 'flex', gap: 8, alignItems: 'center', marginTop: 6,
               }}>
-                <span>⚠️</span>
+                <AlertTriangleIcon size={14} strokeWidth={2} style={{ flexShrink: 0 }} />
                 <span style={{ color: 'var(--text-muted)' }}>
                   IA non disponible (Ollama local). Utilisez <strong>Analyser</strong> pour l'analyse rapide.
                 </span>
               </div>
             )}
 
-            {aiError && <p className="adapt-url-error" style={{ marginTop: 6 }}>{aiError}</p>}
+            {aiError && <p className="adapt-url-error" style={{ marginTop: 6 }}><AlertTriangleIcon size={13} strokeWidth={2} />{aiError}</p>}
 
             <div className="modal-footer">
               <span className="modal-chars">{text.length} caractères</span>
@@ -285,7 +288,7 @@ export default function ImportModal({ onClose, onApply }) {
           <div className="modal-body">
             <div className="file-dropzone" style={{ cursor: 'default', minHeight: 130 }}>
               <div className="dropzone-inner">
-                <span className="adapt-spin-icon">⚙</span>
+                <Spinner size={22} />
                 <div>
                   <div className="dropzone-title">L'IA analyse et organise votre CV…</div>
                   <div className="dropzone-hint">Modèle : <strong>{model}</strong> (60 à 120 secondes)</div>
@@ -308,7 +311,7 @@ export default function ImportModal({ onClose, onApply }) {
           <div className="modal-body">
             <p className="modal-hint">
               {parsedBy === 'ai'
-                ? <><strong style={{ color: 'var(--primary)' }}>✨ Analyse IA</strong> : voici ce que l'IA a structuré</>
+                ? <><strong style={{ color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', gap: 5 }}><SparklesIcon size={13} strokeWidth={2} /> Analyse IA</strong> : voici ce que l'IA a structuré</>
                 : 'Voici ce que j\'ai détecté dans le texte :'
               }
             </p>
