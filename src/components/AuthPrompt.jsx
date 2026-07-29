@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import LoginModal from './LoginModal.jsx'
+import { SparklesIcon } from './icons.jsx'
 
 export default function AuthPrompt({ onDismiss }) {
   const [showLogin, setShowLogin] = useState(false)
@@ -13,7 +14,7 @@ export default function AuthPrompt({ onDismiss }) {
     <div className="modal-overlay">
       <div className="modal-card auth-prompt-card">
         <div className="modal-body auth-prompt-body">
-          <span className="auth-prompt-icon">✨</span>
+          <span className="auth-prompt-icon"><SparklesIcon size={30} strokeWidth={1.6} /></span>
           <h2 className="auth-prompt-title">Bienvenue sur CV Builder</h2>
           <p className="auth-prompt-desc">
             Connectez-vous pour débloquer l'import de CV par IA, l'adaptation au poste

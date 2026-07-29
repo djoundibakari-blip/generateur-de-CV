@@ -1148,7 +1148,7 @@ textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.55; }
    ═══════════════════════════════════════════════════════════════════════ */
 .auth-prompt-card { max-width: 420px; }
 .auth-prompt-body { text-align: center; padding: 36px 32px; }
-.auth-prompt-icon { font-size: 36px; display: block; margin-bottom: 14px; }
+.auth-prompt-icon { display: flex; justify-content: center; color: var(--primary); margin-bottom: 14px; }
 .auth-prompt-title { font-size: 20px; font-weight: 800; color: white; margin-bottom: 10px; }
 .auth-prompt-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
 .auth-prompt-actions { display: flex; flex-direction: column; gap: 10px; }

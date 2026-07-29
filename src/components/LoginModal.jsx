@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { signIn } from 'next-auth/react'
 import { usePlan } from '../context/PlanContext.jsx'
+import { LockIcon } from './icons.jsx'
 
 // Comptes de démo (phase de test uniquement — voir memoire projet_test_accounts)
 const TEST_ACCOUNTS = [
@@ -37,7 +38,7 @@ export default function LoginModal({ onClose }) {
 
         <div className="modal-head">
           <div className="modal-head-left">
-            <span className="modal-icon">🔐</span>
+            <span className="modal-icon"><LockIcon size={18} strokeWidth={1.8} /></span>
             <div>
               <div className="modal-title">Se connecter</div>
               <div className="modal-sub">Accédez aux fonctionnalités IA selon votre offre</div>
