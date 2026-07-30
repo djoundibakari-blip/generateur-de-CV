@@ -16,6 +16,8 @@ export default function AdaptModal({ cv, onApply, onClose }) {
   const [result, setResult]     = useState(null)
   const [resultTab, setResultTab] = useState('comparaison')
   const [errMsg, setErrMsg]     = useState('')
+  const [retryAfter, setRetryAfter] = useState(null) // secondes imposées par le rate limit IA
+  const [retryIn, setRetryIn]       = useState(0)     // décompte en cours avant réessai auto
   const [dragOver, setDragOver] = useState(false)
   const [extractMsg, setExtractMsg] = useState('')
   const [urlInput, setUrlInput] = useState('')
@@ -91,7 +93,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
      Adapt    → 2 appels séquentiels (Agent 2 → Agent 3)
   ════════════════════════════════════════════════ */
   const handleRun = async () => {
-    setErrMsg('')
+    setErrMsg(''); setRetryAfter(null)
 
     /* ── MODE ANALYZE ── */
     if (mode === 'analyze') {
@@ -105,10 +107,14 @@ export default function AdaptModal({ cv, onApply, onClose }) {
         const data = await res.json()
         if (!res.ok || data.error) {
           const msg = typeof data.error === 'string' ? data.error : 'Erreur inconnue'
-          throw new Error(msg)
+          throw new Error(msg, { cause: data.retryAfter })
         }
         setResult(data); setPhase('result')
-      } catch (e) { setErrMsg(e?.message || String(e) || 'Erreur inconnue'); setPhase('error') }
+      } catch (e) {
+        setErrMsg(e?.message || String(e) || 'Erreur inconnue')
+        setRetryAfter(e?.cause ?? null)
+        setPhase('error')
+      }
       return
     }
 
@@ -127,7 +133,7 @@ export default function AdaptModal({ cv, onApply, onClose }) {
       const jobRequirements = await r1.json()
       if (!r1.ok || jobRequirements.error) {
         const msg = typeof jobRequirements.error === 'string' ? jobRequirements.error : 'Erreur Agent 2'
-        throw new Error(msg)
+        throw new Error(msg, { cause: jobRequirements.retryAfter })
       }
 
       /* ─ Agent 3 : adaptation du CV ─ */
@@ -141,12 +147,36 @@ export default function AdaptModal({ cv, onApply, onClose }) {
       const adapted = await r2.json()
       if (!r2.ok || adapted.error) {
         const msg = typeof adapted.error === 'string' ? adapted.error : 'Erreur Agent 3'
-        throw new Error(msg)
+        throw new Error(msg, { cause: adapted.retryAfter })
       }
 
       setResult(adapted); setPhase('result')
-    } catch (e) { setErrMsg(e?.message || String(e) || 'Erreur inconnue'); setPhase('error') }
+    } catch (e) {
+      setErrMsg(e?.message || String(e) || 'Erreur inconnue')
+      setRetryAfter(e?.cause ?? null)
+      setPhase('error')
+    }
   }
+
+  /* ── Rate limit IA : décompte + réessai automatique une fois le délai écoulé,
+     pour éviter que l'utilisateur retape sur "Réessayer" avant la fin du délai
+     imposé par le fournisseur (renvoie systématiquement la même erreur 429). ── */
+  useEffect(() => {
+    if (phase !== 'error' || !retryAfter) { setRetryIn(0); return }
+    setRetryIn(retryAfter)
+    const id = setInterval(() => {
+      setRetryIn(s => {
+        if (s <= 1) {
+          clearInterval(id)
+          handleRun()
+          return 0
+        }
+        return s - 1
+      })
+    }, 1000)
+    return () => clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, retryAfter])
 
   const handleApply = () => { onApply(result); onClose() }
   const scoreColor  = (s) => s >= 70 ? '#5CE08A' : s >= 40 ? '#E0C05C' : '#E07070'
@@ -604,7 +634,9 @@ export default function AdaptModal({ cv, onApply, onClose }) {
             </div>
             <div className="modal-footer">
               <button className="btn-secondary" onClick={onClose}>Fermer</button>
-              <button className="btn-export" onClick={() => setPhase('input')}>Réessayer</button>
+              <button className="btn-export" onClick={() => setPhase('input')} disabled={retryIn > 0}>
+                {retryIn > 0 ? `Réessai automatique dans ${retryIn}s…` : 'Réessayer'}
+              </button>
             </div>
           </div>
         )}

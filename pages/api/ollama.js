@@ -14,9 +14,10 @@ const GROQ_MODEL   = process.env.GROQ_MODEL   || 'llama-3.1-8b-instant'
 /* Erreur IA typée : permet aux handlers de renvoyer le vrai motif d'échec
    (rate limit, panne réseau...) au lieu d'un message générique. */
 class AIError extends Error {
-  constructor(status, message) {
+  constructor(status, message, retryAfter = null) {
     super(message)
     this.status = status
+    this.retryAfter = retryAfter
   }
 }
 
@@ -109,9 +110,10 @@ async function groqChat(messages, { numPredict, temperature = 0.15, schema, sche
     console.error('Groq error:', err)
     if (err?.error?.code === 'rate_limit_exceeded') {
       const wait = err.error.message?.match(/try again in ([\d.]+)s/)?.[1]
+      const retryAfter = wait ? Math.ceil(Number(wait)) : 5
       throw new AIError(429, wait
-        ? `Limite de débit de l'IA atteinte, réessayez dans ${Math.ceil(Number(wait))} secondes.`
-        : "Limite de débit de l'IA atteinte, réessayez dans quelques secondes.")
+        ? `Limite de débit de l'IA atteinte, réessayez dans ${retryAfter} secondes.`
+        : "Limite de débit de l'IA atteinte, réessayez dans quelques secondes.", retryAfter)
     }
     throw new AIError(502, "Le service IA a retourné une erreur. Réessayez dans un instant.")
   }
@@ -240,7 +242,7 @@ Règles strictes :
         { role: 'user',   content: `## TEXTE BRUT DU CV (peut être désordonné si PDF 2 colonnes)\n${cvText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"personal":{"prenom":"","nom":"","headline":"","email":"","telephone":"","resume":"","localisation":"","github":""},"experiences":[{"poste":"","entreprise":"","debut":"","fin":"","description":""}],"projets":[{"nom":"","technologies":"","lien":"","description":""}],"formations":[{"diplome":"","ecole":"","debut":"","fin":"","description":""}],"competences":[{"nom":"","niveau":""}],"qualites":[{"nom":""}],"langues":[{"nom":"","niveau":""}],"passions":[{"nom":""}]}` },
       ], { numPredict: 2500, numCtx: 4096, timeout: 360, temperature: 0.1, schema: SCHEMA_PARSE, schemaName: 'cv_parse' })
     } catch (e) {
-      if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+      if (e instanceof AIError) return res.status(e.status).json({ error: e.message, retryAfter: e.retryAfter })
       throw e
     }
 
@@ -270,7 +272,7 @@ Règles strictes :
         { role: 'user',   content: `## OFFRE D'EMPLOI\n${offerText}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"poste":"","entreprise":"","secteur":"","contrat":"","localisation":"","experience_requise":"","niveau_etudes":"","stack_obligatoire":[],"stack_souhaitee":[],"soft_skills":[],"missions_principales":[]}` },
       ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1, schema: SCHEMA_EXTRACT_JOB, schemaName: 'job_requirements' })
     } catch (e) {
-      if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+      if (e instanceof AIError) return res.status(e.status).json({ error: e.message, retryAfter: e.retryAfter })
       throw e
     }
 
@@ -290,7 +292,7 @@ Règles strictes :
         { role: 'user',   content: `## CV À ANALYSER (JSON)\n${cvJson}\n\n## MISSION\n1. Score de qualité global (0–100) : clarté, exhaustivité, impact des descriptions, cohérence.\n2. 3 à 5 points forts (ce qui est bien fait).\n3. 3 à 5 points faibles ou axes d'amélioration concrets.\n4. 3 à 5 suggestions d'amélioration actionnables et précises.\n5. Sections importantes manquantes ou trop courtes.\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":68,"points_forts":[],"points_faibles":[],"suggestions":[],"sections_manquantes":[]}` },
       ], { numPredict: 1500, numCtx: 3072, timeout: 300, temperature: 0.3, schema: SCHEMA_ANALYZE, schemaName: 'cv_analysis' })
     } catch (e) {
-      if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+      if (e instanceof AIError) return res.status(e.status).json({ error: e.message, retryAfter: e.retryAfter })
       throw e
     }
 
@@ -316,7 +318,7 @@ Règles strictes :
           { role: 'user',   content: `## OFFRE\n${offerText}\n\n## FORMAT JSON\n{"poste":"","stack_obligatoire":[],"stack_souhaitee":[],"soft_skills":[],"experience_requise":"","niveau_etudes":"","missions_principales":[]}` },
         ], { numPredict: 1200, numCtx: 2048, timeout: 240, temperature: 0.1, schema: SCHEMA_EXTRACT_JOB, schemaName: 'job_requirements' })
       } catch (e) {
-        if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+        if (e instanceof AIError) return res.status(e.status).json({ error: e.message, retryAfter: e.retryAfter })
         throw e
       }
 
@@ -347,7 +349,7 @@ RÈGLES ABSOLUES — HALLUCINATION INTERDITE :
         { role: 'user',   content: `## EXIGENCES DU POSTE (JSON — extrait par Agent 2)\n${exigencesJson}\n\n## CV DU CANDIDAT (JSON)\n${cvJson}\n\n## MISSION\n1. Réécris personal.resume : mets en avant les points qui matchent l'offre (max 500 car.).\n2. Adapte personal.headline au poste si pertinent, sinon conserve-le.\n3. Pour chaque expérience : reformule description avec les mots-clés du poste (garde les faits).\n4. Pour chaque projet (projets) : reformule description avec les mots-clés du poste (garde les faits, la techno et le lien inchangés) — pour un profil étudiant/junior, les projets valent autant que les expériences, ne les néglige pas.\n5. Réordonne competences : stack_obligatoire en premier, puis stack_souhaitee, puis reste.\n6. Score de correspondance (0–100) honnête.\n7. Compétences du poste absentes du CV → missing_skills (max 8).\n8. "comparaison" est OBLIGATOIRE et NE DOIT JAMAIS être vide : crée une entrée pour CHAQUE item de stack_obligatoire, stack_souhaitee, soft_skills, et pour experience_requise (si non vide), en indiquant si le CV le couvre (present: true/false) avec une courte explication (detail).\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"score":72,"missing_skills":[],"headline":"","resume":"","experiences":[{"id":"ID_EXACT_DU_CV","description":""}],"projets":[{"id":"ID_EXACT_DU_CV","description":""}],"competences":[{"id":"ID_EXACT_DU_CV","nom":"","niveau":""}],"comparaison":[{"exigence":"","present":true,"detail":""}]}` },
       ], { numPredict: 3000, numCtx: 4096, timeout: 540, temperature: 0.2, schema: SCHEMA_ADAPT, schemaName: 'cv_adaptation' })
     } catch (e) {
-      if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+      if (e instanceof AIError) return res.status(e.status).json({ error: e.message, retryAfter: e.retryAfter })
       throw e
     }
 
@@ -381,7 +383,7 @@ RÈGLES ABSOLUES — HALLUCINATION INTERDITE :
         { role: 'user',   content: `## OFFRE D'EMPLOI\n${offerText}\n\n## CV DU CANDIDAT (JSON)\n${cvJson}\n\n## FORMAT JSON STRICT — RIEN D'AUTRE\n{"lettre":""}` },
       ], { numPredict: 1400, numCtx: 3072, timeout: 300, temperature: 0.35, schema: SCHEMA_COVER_LETTER, schemaName: 'cover_letter' })
     } catch (e) {
-      if (e instanceof AIError) return res.status(e.status).json({ error: e.message })
+      if (e instanceof AIError) return res.status(e.status).json({ error: e.message, retryAfter: e.retryAfter })
       throw e
     }
 
