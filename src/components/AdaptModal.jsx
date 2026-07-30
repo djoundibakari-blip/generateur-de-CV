@@ -165,18 +165,17 @@ export default function AdaptModal({ cv, onApply, onClose }) {
     if (phase !== 'error' || !retryAfter) { setRetryIn(0); return }
     setRetryIn(retryAfter)
     const id = setInterval(() => {
-      setRetryIn(s => {
-        if (s <= 1) {
-          clearInterval(id)
-          handleRun()
-          return 0
-        }
-        return s - 1
-      })
+      setRetryIn(s => (s > 0 ? s - 1 : 0))
     }, 1000)
     return () => clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, retryAfter])
+
+  // Déclenche le réessai une fois le décompte à zéro (effet séparé : pas de
+  // side-effect réseau dans l'updater de setRetryIn ci-dessus).
+  useEffect(() => {
+    if (phase === 'error' && retryAfter && retryIn === 0) handleRun()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [retryIn])
 
   const handleApply = () => { onApply(result); onClose() }
   const scoreColor  = (s) => s >= 70 ? '#5CE08A' : s >= 40 ? '#E0C05C' : '#E07070'

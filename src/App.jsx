@@ -87,12 +87,17 @@ export default function App() {
         ...(aiResult.resume   ? { resume:   aiResult.resume   } : {}),
         ...(aiResult.headline ? { headline: aiResult.headline } : {}),
       },
-      experiences: prev.experiences.map(exp => {
-        const adapted = (aiResult.experiences || []).find(e => e.id === exp.id)
+      experiences: prev.experiences.map((exp, i) => {
+        const list = aiResult.experiences || []
+        // Repli sur la position : un petit modèle (json_object non strict) recopie
+        // parfois mal l'UUID exact, ce qui casse le matching par id alors que
+        // l'ordre des expériences, lui, est toujours préservé par le prompt.
+        const adapted = list.find(e => e.id === exp.id) || list[i]
         return adapted?.description ? { ...exp, description: adapted.description } : exp
       }),
-      projets: prev.projets.map(projet => {
-        const adapted = (aiResult.projets || []).find(p => p.id === projet.id)
+      projets: prev.projets.map((projet, i) => {
+        const list = aiResult.projets || []
+        const adapted = list.find(p => p.id === projet.id) || list[i]
         return adapted?.description ? { ...projet, description: adapted.description } : projet
       }),
       competences: (() => {
